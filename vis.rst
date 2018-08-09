@@ -10,9 +10,9 @@ Furthermore, mapping a specified target variable onto the network, using a color
     from sklearn.preprocessing import MinMaxScaler, StandardScaler
     from sklearn import datasets
     from sklearn.cluster import DBSCAN
-    from tda import mapper, filter
-    from tda.cover import Cover
-    from tda.plot import show, Color
+    from tmap.tda import mapper, filter
+    from tmap.tda.cover import Cover
+    from tmap.tda.plot import show, Color
 
 
     iris = datasets.load_iris()
@@ -59,7 +59,7 @@ The following codes use a "categorical" color type for a categorical variable, s
 .. image:: img/param/vis_2.png
     :alt: plot network with a target 1
     :align: center
-    
+
 For a continuous target variable, we can use the "numerical" color type to make a color map. In this scenario, a node is assigned a color according to the mean values of its samples.
 
 .. code-block:: python

@@ -163,6 +163,5 @@ With SAFE scores and a corresponding TDA graph, *p-value* and *correlation coeff
 
 .. code-block:: python
 
+    from tmap.netx.coenrich import coenrich
     asso_pairs = coenrich(graph,safe_scores)
-
-    print(asso_pairs)
