@@ -17,6 +17,9 @@ The *Mapper* algorithm
 The *Mapper* algorithm consists of four basic steps, from defining a metric space of point cloud, projecting data points onto a low dimensional space, filtering and binning of projected data, to constructing a network representation, as illustrating in the following figure.
 
 .. image:: img/how2work/basic_pipelines.jpg
+    :alt: basic_pipelines
+    :align: center
+    :scale: 35 %
 
 1. When we get a real world dataset, first we need to choose a distance metric to describe the distance between each pair of points. As in the above **figure A**, a three-dimensional Euclidean distance metric is used. Predefined metric can also be used by providing a ``precomputed`` distance matrix to the pipeline. The defined metric will be used by a **filter** function for data projection (or dimension reduction).
 

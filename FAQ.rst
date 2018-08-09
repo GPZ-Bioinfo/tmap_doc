@@ -13,15 +13,23 @@ FAQ
 
 3. **Why would I choose tmap instead of other traditional ordination analysis?**
 
-  blabla....
+  Most significantly, *tmap* presents a TDA network for a microbiome dataset, which has the following advantages than traditional ordination techniques:
+
+  * TDA network captures hidden patterns of a microbiome dataset in terms of nodes and edges between them, with nodes as a group of *highly similar samples*, and edges as a continuity between groups of samples.
+  * TDA network enables users to explore the microbiome landscape of large cohorts, especially population-scale studies, more intuitively and effectively via *tmap* visualization.
+  * TDA network enables users to test for species enrichment and metadata association using network-based statistical analysis, as implemented in *tmap*.
+
+  You can go to :doc:`example` for detailed examples of application of *tmap* to different microbiome datasets.
 
 4. **What is the difference between tmap and other Mapper algorithm?**
 
-  It has been discussed under :doc:`how2work`.
+  We developed *tmap* mainly for population-scale microbiome data analysis, although it can also be used to analyze other high dimensional dataset. *tmap* is unique in its network-based statistical analysis for identifying driver species and for microbiome-wide association analysis. For more details, please see :doc:`how2work`.
 
-5. **What does the meaning of SAFE score?**
+5. **Why are some microbiome samples missing (discarded) in the final TDA network?**
 
-  blabla....
+  *tmap* uses **DBSCAN** for clustering by default, which will drop *noise* samples which are lack of the required number of neighbors. Usually, these samples are taken as outlier or noise in density-based clustering analysis.
+
+  You can use ``tmap.tda.utils.cover_ratio`` to calculate how many samples were retained in the final TDA network. By using other clustering methods, such as **k-means clustering**, you can retain all the samples. *tmap* can take any other cluster method from *scikit-learn* (or with *scikit-learn* compatible APIs), although we recommend using the default **DBSCAN** method. For how to keep more samples in the final TDA network, you can see :doc:`param` for more details.
 
 
 For further questions, and any suggestion, you are welcome to contact us via email: haokui.zhou@gmail.com.

@@ -42,6 +42,7 @@ If we don't have a target variable, we could simply use `show` to visualize the 
 
 .. image:: img/param/vis_1.png
     :alt: plot network default
+    :align: center
 
 Network Plotting With a Target Variable
 ====================================================================================
@@ -57,7 +58,8 @@ The following codes use a "categorical" color type for a categorical variable, s
 
 .. image:: img/param/vis_2.png
     :alt: plot network with a target 1
-
+    :align: center
+    
 For a continuous target variable, we can use the "numerical" color type to make a color map. In this scenario, a node is assigned a color according to the mean values of its samples.
 
 .. code-block:: python
@@ -67,6 +69,6 @@ For a continuous target variable, we can use the "numerical" color type to make 
 
 .. image:: img/param/vis_3.png
     :alt: plot network with a target 2
-
+    :align: center
 
 To go beyond network plotting and exploratory analysis, we can perform network-based statistical and enrichment analysis, which are demonstrated and explained in :doc:`'Network Statistical Analysis'<statistical>`.

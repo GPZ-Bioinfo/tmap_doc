@@ -54,6 +54,8 @@ In the following code, we compare the effects of choosing different components f
 
 .. image:: img/param/comp1.png
     :alt: iris tmap filter result1
+    :scale: 40 %
+    :align: center
 
 Using two components of MDS as *lens*, *tmap* generates a graph with 219 nodes and 1133 edges.
 *Note: component index is 0-based, and the first component is indexed by 0*.
@@ -103,6 +105,8 @@ What if we choose three components of MDS?
 
 .. image:: img/param/comp2.png
     :alt: iris tmap filter result2
+    :scale: 40 %
+    :align: center
 
 The resulted graph has 921 nodes and 13279 edges. Increasing number of components makes the graph more densely connected with more nodes. If we compare these two graphs visually, we could see that the general topological structure is similar. But the more ``components`` you used, the more complicated a graph will be generated. We recommend the default parameter ``components=[0,1]`` in most situations.
 
