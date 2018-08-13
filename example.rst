@@ -39,6 +39,8 @@ To demonstrate and validate the performance of *tmap*, we benchmarked the result
     cover = Cover(projected_data=MinMaxScaler().fit_transform(projected_X), resolution=50, overlap=0.75)
     graph = tm.map(data=X, cover=cover, clusterer=clusterer)
     print('Graph covers %.2f percentage of samples.' % cover_ratio(graph,X))
+    n_iter = 1000
+    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=n_iter, threshold=0.05)
 
 
 Driver species analysis
@@ -47,6 +49,8 @@ Driver species analysis
 In FGFP study, driver genus was identified by the contribution of each genus to microbiome variation via Canonical correspondence analysis (**CCA**) using both raw and normalized genus abundance. In our re-analysis, we identified driver genus by ranking the importance of a genus by its SAFE enrichment score with *tmap*. This approach successfully recovered all the top-10 driver genera reported in the FGFP study.
 
 *tmap* also identified 3 driver genera that were not reported in the FGFP study, including *unclassified_Veillonellaceae, unclassified_Clostridiaceae and Sporobacter*. As in the following figure of *tmap* network visualization, these genera (such as *Sporobacter spp.*) show enrichments in multiple dispersed parts of the network, rather than a single enriched component, which presents a 'non-linear' pattern that may be hard to detect in CCA.
+
+
 
 .. image:: img/example/FGFP_fig1.png
     :alt: FGFP Sporobacter spp.

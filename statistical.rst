@@ -22,7 +22,6 @@ The following codes show how SAFE scores help to identify enriched nodes with si
     from tmap.netx.SAFE import SAFE_batch
     from tmap.test import load_data
 
-
     # load taxa abundance data, sample metadata and precomputed distance matrix
     X = load_data.FGFP_genus_profile()
     metadata = load_data.FGFP_metadata()
@@ -58,8 +57,9 @@ The following codes show how SAFE scores help to identify enriched nodes with si
 
     visu_temp(target_feature,dtype='numerical',strength=0.08)
 
-.. image:: img/association/ab2SAFE_Bacteroides.png
 
+.. image:: img/association/ab2SAFE_Bacteroides.png
+    :align: center
 
 Network-based Co-enrichment Analysis
 ========================================
