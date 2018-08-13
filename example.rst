@@ -48,12 +48,12 @@ Driver species analysis
 
 In FGFP study, driver genus was identified by the contribution of each genus to microbiome variation via Canonical correspondence analysis (**CCA**) using both raw and normalized genus abundance. In our re-analysis, we identified driver genus by ranking the importance of a genus by its SAFE enrichment score with *tmap*. This approach successfully recovered all the top-10 driver genera reported in the FGFP study.
 
-Additionally, *tmap* also identified top-ranking driver genera that were not reported among the top-10 driver genera in the FGFP study, including *unclassified_Veillonellaceae, unclassified_Clostridiaceae and Sporobacter*. As in the following figure of *tmap* network visualization, these genera (such as *Sporobacter spp.*) show enrichments in multiple dispersed parts of the network, rather than a single enriched component, which presents a 'non-linear' pattern that may be hard to detect in CCA.
+Additionally, *tmap* also identified top-ranking driver genera that were not reported among the top-10 driver genera in the FGFP study, including *unclassified_Veillonellaceae, unclassified_Clostridiaceae and Sporobacter*. As in the following figure of *tmap* network visualization, these genera (such as *Sporobacter*) show enrichments in multiple dispersed parts of the network, rather than a single enriched component, which presents a 'non-linear' pattern that may be hard to detect in CCA.
 
 
 
 .. image:: img/example/FGFP_fig1.png
-    :alt: FGFP Sporobacter spp.
+    :alt: FGFP Sporobacter
 
 Identification of significant host covariates
 =============================================================
@@ -77,9 +77,9 @@ Microbiome-wide association of FGFP host covariates
 
 In FGFP study, *the boosted additive generalized linear model* was performed to analyze association between host covariates and driver species, with a 5% significance level (after adjustment for multiple comparison). However, this approach reported small effect sizes for covariates to explain the variation of genus abundance (correlation coefficient from 0.015 to 0.147).
 
-As an alternative, *tmap* uses the network-based SAFE scores for association analysis, rather than the original feature values. And association is performed based on aggregated values on nodes (groups of samples), instead of original feature values on samples. Pairwise Pearson correlation was calculated with a FDR<5% significance level. Compared with results of the FGFP study, this approach reported improved effect sizes of host covariates (correlation coefficient from 0.115 to 0.728). For example, the association between *concentration of serum Hemoglobin* and abundance of *Roseburia spp.*, detected to be significantly associated by both approaches, the coefficient was improved from 0.12 to 0.72 by using *tmap*.
+As an alternative, *tmap* uses the network-based SAFE scores for association analysis, rather than the original feature values. And association is performed based on aggregated values on nodes (groups of samples), instead of original feature values on samples. Pairwise Pearson correlation was calculated with a FDR<5% significance level. Compared with results of the FGFP study, this approach reported improved effect sizes of host covariates (correlation coefficient from 0.115 to 0.728). For example, the association between *concentration of serum Hemoglobin* and abundance of *Roseburia*, detected to be significantly associated by both approaches, the coefficient was improved from 0.12 to 0.72 by using *tmap*.
 
-Additionally, new associations were also identified by *tmap*. For example, the association between usage of *A06AD15_65_.osmotic_laxatives* and abundance of *Aeromonas spp.* was found, as demonstrated in the following figure.
+Additionally, new associations were also identified by *tmap*. For example, the association between usage of *A06AD15_65_.osmotic_laxatives* and abundance of *Aeromonas* was found, as demonstrated in the following figure.
 
 .. image:: img/example/FGFP_fig4.png
     :alt: FGFP MWAS
