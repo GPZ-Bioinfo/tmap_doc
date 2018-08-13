@@ -27,7 +27,7 @@ To install tmap, run::
 If you encounter any error like ``Import error: tkinter``, you need to run ``sudo apt install python-tk`` or ``sudo apt install python3-tk``.
 
 Contents
---------
+##########
 
 .. toctree::
    :maxdepth: 1
@@ -43,7 +43,7 @@ Contents
    FAQ.rst
 
 Indices and tables
-==================
+####################
 
 * :ref:`genindex`
 * :ref:`search`

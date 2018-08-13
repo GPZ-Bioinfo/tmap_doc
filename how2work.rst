@@ -48,7 +48,7 @@ The **SAFE** algorithm takes the following steps to calculate an enrichment scor
 
     O_{n} = \frac{-log_{10}(max(P_{n},\frac{1}{I+1}))}{-log_{10}\frac{1}{I+1}}
 
-where ``I`` is the times of permutations, ``P`` is the neighborhood score of node *n*, ``O`` is the neighborhood enrichment score of node *n*. This permutation is performed independently for each target variable then there are more than one.
+where ``I`` is the times of permutations, ``P`` is the neighborhood score of node *n*, ``O`` is the neighborhood enrichment score of node *n*. This permutation is performed independently for each target variable when there are more than one.
 
 5. A node is considered significantly enriched given a p-value threshold of ``0.05`` if:
 

@@ -48,7 +48,7 @@ Driver species analysis
 
 In FGFP study, driver genus was identified by the contribution of each genus to microbiome variation via Canonical correspondence analysis (**CCA**) using both raw and normalized genus abundance. In our re-analysis, we identified driver genus by ranking the importance of a genus by its SAFE enrichment score with *tmap*. This approach successfully recovered all the top-10 driver genera reported in the FGFP study.
 
-*tmap* also identified 3 driver genera that were not reported in the FGFP study, including *unclassified_Veillonellaceae, unclassified_Clostridiaceae and Sporobacter*. As in the following figure of *tmap* network visualization, these genera (such as *Sporobacter spp.*) show enrichments in multiple dispersed parts of the network, rather than a single enriched component, which presents a 'non-linear' pattern that may be hard to detect in CCA.
+Additionally, *tmap* also identified top-ranking driver genera that were not reported among the top-10 driver genera in the FGFP study, including *unclassified_Veillonellaceae, unclassified_Clostridiaceae and Sporobacter*. As in the following figure of *tmap* network visualization, these genera (such as *Sporobacter spp.*) show enrichments in multiple dispersed parts of the network, rather than a single enriched component, which presents a 'non-linear' pattern that may be hard to detect in CCA.
 
 
 
