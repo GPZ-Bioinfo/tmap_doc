@@ -82,7 +82,8 @@ For using custom distance metric from a precomputed distance matrix, you need to
 .. code-block:: python
 
     from scipy.spatial.distance import pdist,squareform
-    lens = [filter.MDS(components=[0, 1],metric='precomputed')]
+    from tmap.tda.metric import Metric
+    lens = [filter.MDS(components=[0, 1],metric=Metric('precomputed'))]
     my_dist = squareform(pdist(X,metric="braycurtis"))
     projected_X = tm.filter(my_dist, lens=lens)
 
