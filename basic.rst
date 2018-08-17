@@ -132,7 +132,8 @@ From the above figure, feature coloring shows that ``sepal length`` is strongly 
 
     from tmap.netx.SAFE import *
     safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000, threshold=0.05)
-    color = Color(target=safe_scores[X.columns[0]], dtype="numerical")
+    color = Color(target=safe_scores[0], dtype="numerical",target_by="node")
+    # safe scores will use number as feature names because passed meta_data(X) is a array which is lack of feature name of column name.
     show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.04)
 
 .. image:: img/iris_basic_example3.png
