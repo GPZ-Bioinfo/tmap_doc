@@ -17,9 +17,10 @@ Using the classical *iris* dataset as a simple example. This case is use to demo
 .. code-block:: python
 
     from sklearn import datasets
-
+    import pandas as pd
     iris = datasets.load_iris()
     X = iris.data
+    X = pd.DataFrame(X,columns = iris.feature_names)
 
 Once we have prepared input data (in *pandas DataFrame* or a *numpy matrix*), we can proceed to initiate the basic instances for TDA analysis, including ``Mapper``, ``filter``, ``cluster`` and ``Cover``.
 
@@ -84,7 +85,7 @@ For using custom distance metric from a precomputed distance matrix, you need to
     from scipy.spatial.distance import pdist,squareform
     from tmap.tda.metric import Metric
     lens = [filter.MDS(components=[0, 1],metric=Metric('precomputed'))]
-    my_dist = squareform(pdist(X,metric="braycurtis"))
+    my_dist = squareform(pdist(X.values,metric="braycurtis"))
     projected_X = tm.filter(my_dist, lens=lens)
 
 A ``filter`` is a general technique to project data points from the original data space onto a low dimensional space. Different filter preserves different aspect of the original dataset, such as MDS, which try to preserve distances between data points. Therefore, a ``filter`` provides a *view* of the data to look through. Multiple *views* can be joined to present the data for topological analysis. Choice of filter depends on the studied dataset and research purpose. Projection of the original dataset using a specified filter has a global effect in determining the TDA network structure.
@@ -120,7 +121,7 @@ First, we plot and color the first feature (``sepal length``) of the iris datase
 
 .. code-block:: python
 
-    color = Color(target=X[:,0], dtype="numerical")
+    color = Color(target=X.iloc[:,0], dtype="numerical")
     show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.04)
 
 .. image:: img/iris_basic_example2.png
@@ -132,8 +133,7 @@ From the above figure, feature coloring shows that ``sepal length`` is strongly 
 
     from tmap.netx.SAFE import *
     safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000, threshold=0.05)
-    color = Color(target=safe_scores[0], dtype="numerical",target_by="node")
-    # safe scores will use number as feature names because passed meta_data(X) is a array which is lack of feature name of column name.
+    color = Color(target=safe_scores[X.columns[0]], dtype="numerical",target_by="node")
     show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.04)
 
 .. image:: img/iris_basic_example3.png
