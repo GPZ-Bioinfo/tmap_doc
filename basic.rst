@@ -28,12 +28,13 @@ Once we have prepared input data (in *pandas DataFrame* or a *numpy matrix*), we
 
     from tmap.tda import mapper, filter
     from tmap.tda.cover import Cover
-
+    from sklearn.cluster import DBSCAN
+    from sklearn.preprocessing import StandardScaler,MinMaxScaler
     # Step1. initiate a Mapper
     tm = mapper.Mapper(verbose=1)
 
     # Step2. Projection
-    lens = [filter.MDS(components=[0, 1])]
+    lens = [filter.MDS(components=[0, 1],random_state=100)]
     projected_X = tm.filter(X, lens=lens)
     clusterer = DBSCAN(eps=0.75, min_samples=1)
     cover = Cover(projected_data=MinMaxScaler().fit_transform(projected_X), resolution=20, overlap=0.75)
@@ -52,23 +53,22 @@ The generated graph consists of 201 nodes and 1020 edges, which can be obtained 
 
     print(len(graph['nodes']),len(graph['edges']))
 
-    201 1020
+    197 913
 
 Each node represents a group of samples, generated from the clustering step. Mapping between TDA nodes and samples can be found by:
 
 .. code-block:: python
 
     print(graph['nodes'].items())
-    (0, array([ 718, 1655, 2564, 2846, 3946, 4431])),
-    (1, array([  69,  616,  853, 1266, 1575, 1833, 1959, 2268, 3635])),
-    (2, array([  28,  350,  511,  601,  616,  629,  723, 1162, 1193, 1266,
-      1300,1424, 1536, 1634, 1841, 1868, 1943, 2268, 2282, 2719, 2898,
-      2929,3300, 3605, 3634, 3763, 3816, 3848, 4461, 4828])),
-    (3, array([   1,  669,  692,  814, 1064, 1424, 1435, 1503, 1512, 1909, 2145,
-      2182, 2412, 2786, 2840, 2849, 2929, 3132, 3162, 3179, 3414, 3439,
-      3541, 3667, 3708, 3759, 4038, 4168, 4170, 4176, 4478, 4497, 4606,
-      4938, 4974])),
-    ......
+
+    dict_items([
+    (0, array([105])),
+    (1, array([105, 118, 122])),
+    (2, array([131])),
+    (3, array([105, 118, 122])),
+    (4, array([117, 131])),
+    (5, array([117, 131])),
+    ......])
 
 
 As above, keys in the returned items are node IDs, and the values are sample index in the original input data.
