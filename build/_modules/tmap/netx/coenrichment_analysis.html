@@ -1,0 +1,537 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tmap.netx.coenrichment_analysis &mdash; tmap 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tmap
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../basic.html">Basic Usage of <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param.html">How to Choose Parameters in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../vis.html">Visualizing and Exploring TDA Network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../statistical.html">Network Statistical Analysis in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how2work.html">How <em>tmap</em> work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example.html">Microbiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../FAQ.html">FAQ</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tmap</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tmap.netx.coenrichment_analysis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tmap.netx.coenrichment_analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">scs</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">tmap.netx.SAFE</span> <span class="k">import</span> <span class="n">get_enriched_nodes</span>
+
+
+<span class="k">def</span> <span class="nf">get_component_nodes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">enriched_nodes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a list of enriched nodes which comes from ``get_enriched_nodes``. Normally it the enriched_centroid instead of the others nodes around them.</span>
+<span class="sd">    :param list enriched_nodes: list of nodes ID which is enriched with given feature and threshold.</span>
+<span class="sd">    :param graph:</span>
+<span class="sd">    :return: A nested list which contain multiple list of nodes which is not connected to each other.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sub_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">enriched_nodes</span><span class="p">)</span>
+    <span class="n">sub_edges</span> <span class="o">=</span> <span class="p">[</span><span class="n">edge</span> <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">sub_nodes</span> <span class="ow">and</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">sub_nodes</span><span class="p">]</span>
+
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">sub_nodes</span><span class="p">)</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="n">sub_edges</span><span class="p">)</span>
+
+    <span class="n">comp_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodes</span> <span class="k">for</span> <span class="n">nodes</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">connected_components</span><span class="p">(</span><span class="n">G</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">comp_nodes</span>
+
+
+<span class="k">def</span> <span class="nf">is_enriched</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Accessory function for further determine whether it is a co-enrichment after fisher-exact test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">total_1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
+    <span class="n">total_2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s3</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">s4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">total_1</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">total_2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_1</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">s3</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">coenrichment_for_nodes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">fea</span><span class="p">,</span> <span class="n">enriched_centroid</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">safe_scores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coenrichment main function</span>
+<span class="sd">    With given feature and its enriched nodes, we could construct a contingency table when we comparing to other feature and its enriched nodes.</span>
+<span class="sd">    For statistical test association between different features, fisher-exact test was applied to each constructed contingency table. Fisher-exact test only consider the association between two classifications instead of the ratio. For coenrichment, we also implement a accessory function called ``is_enriched`` to further judge that if the ratio of enrichment is bigger than the non-enrichement.</span>
+
+<span class="sd">    Besides the global co-enrichment, several local enrichment were observed. With ``networkx`` algorithm for finding component, we could extract each local enrichment nodes from global enrichment.</span>
+<span class="sd">    Because of the complex combination between comparison of local enrichment, two different contingency table was constructed.</span>
+
+<span class="sd">    The contingency table which compare different enriched nodes among components and enriched or non-enriched nodes of other features shown below.</span>
+
+<span class="sd">                                        fea this comp enriched nodes, fea other comp enriched nodes</span>
+<span class="sd">                    o_f_enriched_nodes           s1                          s2</span>
+<span class="sd">                    o_f_non-enriched_nodes       s3                          s4</span>
+
+<span class="sd">    The other contingency table which compare enriched nodes within specific component or non-enriched nodes and enriched or non-enriched nodes of other features shown below.</span>
+<span class="sd">                                        fea this comp enriched nodes, fea non-enriched nodes</span>
+<span class="sd">                    o_f_enriched_nodes           s1                          s2</span>
+<span class="sd">                    o_f_non-enriched_nodes       s3                          s4</span>
+
+<span class="sd">    For convenient calculation, three different mode [both|global|local] could be choose.</span>
+
+<span class="sd">    Output objects contain two different kinds of dictionary. One dict is recording the correlation information between different features, the other is recording the raw contingency table info between each comparsion which is a list of nodes representing s1,s2,s3,s4.</span>
+
+<span class="sd">    If mode equals to &#39;both&#39;, it will output global correlative dict, local correlative, metainfo.</span>
+<span class="sd">    If mode equals to &#39;global&#39;, it will output local correlative, metainfo.</span>
+<span class="sd">    If mode equals to &#39;local&#39;, it will output global correlative dict, metainfo.</span>
+
+<span class="sd">    For global correlative, keys are compared features and values are tuples (oddsratio, pvalue) from fisher-exact test.</span>
+<span class="sd">    For local correlative, keys are tuples of (index of components, size of components, features) and values are as same as global correlative.</span>
+<span class="sd">    The remaining metainfo is a dictionary shared same key to global/local correlative but contains contingency table info.</span>
+
+<span class="sd">    :param graph: tmap constructed graph</span>
+<span class="sd">    :param list nodes: a list of nodes you want to process from specific feature</span>
+<span class="sd">    :param str fea: feature name which doesn&#39;t need to exist at enriched_centroid</span>
+<span class="sd">    :param dict enriched_centroid: enriched_centroide output from ``get_enriched_nodes``</span>
+<span class="sd">    :param float threshold: None or a threshold for SAFE score. If it is a None, it will not filter the nodes.</span>
+<span class="sd">    :param dict safe_scores: A dictionary which store SAFE_scores for filter the nodes. If you want to filter the nodes, it must simultaneously give safe_scores and threshold.</span>
+<span class="sd">    :param str mode: [both|global|local]</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="s1">&#39;global&#39;</span><span class="p">,</span> <span class="s1">&#39;local&#39;</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Wrong syntax input, mode should be one of [both|global|local]&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">total_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="n">comp_nodes</span> <span class="o">=</span> <span class="n">get_component_nodes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+    <span class="n">metainfo</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">global_correlative_feas</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">sub_correlative_feas</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">safe_scores</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fea_enriched_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">_</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">nodes</span> <span class="k">if</span> <span class="n">safe_scores</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fea_enriched_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nodes</span><span class="p">[::])</span>
+    <span class="n">fea_nonenriched_nodes</span> <span class="o">=</span> <span class="n">total_nodes</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">fea_enriched_nodes</span><span class="p">)</span>
+    <span class="n">metainfo</span><span class="p">[</span><span class="n">fea</span><span class="p">]</span> <span class="o">=</span> <span class="n">fea_enriched_nodes</span><span class="p">,</span> <span class="n">comp_nodes</span>
+    <span class="k">for</span> <span class="n">o_f</span> <span class="ow">in</span> <span class="n">enriched_centroid</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">o_f</span> <span class="o">!=</span> <span class="n">fea</span><span class="p">:</span>
+            <span class="n">o_f_enriched_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">enriched_centroid</span><span class="p">[</span><span class="n">o_f</span><span class="p">])</span>
+            <span class="n">o_f_nonenriched_nodes</span> <span class="o">=</span> <span class="n">total_nodes</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">o_f_enriched_nodes</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;both&#39;</span> <span class="ow">or</span> <span class="s1">&#39;global&#39;</span><span class="p">:</span>
+                <span class="c1"># contingency table</span>
+                <span class="c1">#                           fea enriched nodes, fea non-enriched_nodes</span>
+                <span class="c1"># o_f_enriched_nodes           s1                        s2</span>
+                <span class="c1"># o_f_non-enriched_nodes       s3                        s4</span>
+                <span class="n">s1</span> <span class="o">=</span> <span class="n">o_f_enriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">fea_enriched_nodes</span><span class="p">)</span>
+                <span class="n">s2</span> <span class="o">=</span> <span class="n">o_f_enriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">fea_nonenriched_nodes</span><span class="p">)</span>
+                <span class="n">s3</span> <span class="o">=</span> <span class="n">o_f_nonenriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">fea_enriched_nodes</span><span class="p">)</span>
+                <span class="n">s4</span> <span class="o">=</span> <span class="n">o_f_nonenriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">fea_nonenriched_nodes</span><span class="p">)</span>
+                <span class="n">oddsratio</span><span class="p">,</span> <span class="n">pvalue</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">fisher_exact</span><span class="p">([[</span><span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">s2</span><span class="p">)],</span>
+                                                      <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">s3</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">s4</span><span class="p">)]])</span>
+                <span class="k">if</span> <span class="n">_filter</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">pvalue</span> <span class="o">&lt;=</span> <span class="mf">0.05</span> <span class="ow">and</span> <span class="n">is_enriched</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span><span class="p">):</span>
+                        <span class="n">global_correlative_feas</span><span class="p">[</span><span class="n">o_f</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">oddsratio</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">)</span>
+                        <span class="n">metainfo</span><span class="p">[</span><span class="n">o_f</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">global_correlative_feas</span><span class="p">[</span><span class="n">o_f</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">oddsratio</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">)</span>
+                    <span class="n">metainfo</span><span class="p">[</span><span class="n">o_f</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;both&#39;</span> <span class="ow">or</span> <span class="s1">&#39;local&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">nodes</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">comp_nodes</span><span class="p">):</span>
+                    <span class="c1"># contingency table</span>
+                    <span class="c1">#                           fea this comp enriched nodes, fea other comp enriched nodes</span>
+                    <span class="c1"># o_f_enriched_nodes           s1                          s2</span>
+                    <span class="c1"># o_f_non-enriched_nodes       s3                          s4</span>
+                    <span class="n">nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+                    <span class="n">_s1</span> <span class="o">=</span> <span class="n">o_f_enriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+                    <span class="n">_s2</span> <span class="o">=</span> <span class="n">o_f_enriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">fea_enriched_nodes</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">nodes</span><span class="p">))</span>
+                    <span class="n">_s3</span> <span class="o">=</span> <span class="n">o_f_nonenriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+                    <span class="n">_s4</span> <span class="o">=</span> <span class="n">o_f_nonenriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">fea_enriched_nodes</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">nodes</span><span class="p">))</span>
+                    <span class="n">oddsratio</span><span class="p">,</span> <span class="n">pvalue1</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">fisher_exact</span><span class="p">([[</span><span class="nb">len</span><span class="p">(</span><span class="n">_s1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">_s2</span><span class="p">)],</span>
+                                                           <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">_s3</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">_s4</span><span class="p">)]])</span>
+                    <span class="c1"># contingency table</span>
+                    <span class="c1">#                           fea this comp enriched nodes, fea non-enriched nodes</span>
+                    <span class="c1"># o_f_enriched_nodes           s1                          s2</span>
+                    <span class="c1"># o_f_non-enriched_nodes       s3                          s4</span>
+                    <span class="n">s1</span> <span class="o">=</span> <span class="n">o_f_enriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+                    <span class="n">s2</span> <span class="o">=</span> <span class="n">o_f_enriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">fea_nonenriched_nodes</span><span class="p">)</span>
+                    <span class="n">s3</span> <span class="o">=</span> <span class="n">o_f_nonenriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+                    <span class="n">s4</span> <span class="o">=</span> <span class="n">o_f_nonenriched_nodes</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">fea_nonenriched_nodes</span><span class="p">)</span>
+                    <span class="n">oddsratio</span><span class="p">,</span> <span class="n">pvalue2</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">fisher_exact</span><span class="p">([[</span><span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">s2</span><span class="p">)],</span>
+                                                           <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">s3</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">s4</span><span class="p">)]])</span>
+                    <span class="k">if</span> <span class="n">_filter</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">pvalue1</span> <span class="o">&lt;=</span> <span class="mf">0.05</span> <span class="ow">and</span> <span class="n">pvalue2</span> <span class="o">&lt;=</span> <span class="mf">0.05</span> <span class="ow">and</span> <span class="n">is_enriched</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_enriched</span><span class="p">(</span><span class="n">_s1</span><span class="p">,</span> <span class="n">_s2</span><span class="p">,</span> <span class="n">_s3</span><span class="p">,</span> <span class="n">_s4</span><span class="p">):</span>
+                            <span class="n">sub_correlative_feas</span><span class="p">[(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="n">o_f</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">pvalue1</span><span class="p">,</span> <span class="n">pvalue2</span><span class="p">)</span>
+                            <span class="n">metainfo</span><span class="p">[(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="n">o_f</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">_s1</span><span class="p">,</span> <span class="n">_s2</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">sub_correlative_feas</span><span class="p">[(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="n">o_f</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">pvalue1</span><span class="p">,</span> <span class="n">pvalue2</span><span class="p">)</span>
+                        <span class="n">metainfo</span><span class="p">[(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="n">o_f</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">_s1</span><span class="p">,</span> <span class="n">_s2</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;both&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">global_correlative_feas</span><span class="p">,</span> <span class="n">sub_correlative_feas</span><span class="p">,</span> <span class="n">metainfo</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;global&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">global_correlative_feas</span><span class="p">,</span> <span class="n">metainfo</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;global&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sub_correlative_feas</span><span class="p">,</span> <span class="n">metainfo</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">batch_coenrichment</span><span class="p">(</span><span class="n">fea</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">safe_scores</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">p_value</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">_pre_cal_enriched</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Batch find with given feature at all possible features found at safe_scores.</span>
+<span class="sd">    If _pre_cal_enriched was given, n_iter and p_value will be useless. Or you should modify n_iter and p_value as the params you passed to ``SAFE`` algorithm.</span>
+
+<span class="sd">    :param str/list fea: A single feature or a list of feature which is already applied SAFE algorithm.</span>
+<span class="sd">    :param graph:</span>
+<span class="sd">    :param dict safe_scores: A SAFE score output from ``SAFE_batch`` which must contain all values occur at fea.</span>
+<span class="sd">    :param int n_iter: Permutation times used at ``SAFE_batch``.</span>
+<span class="sd">    :param float p_value: The p-value to determine the enriched nodes.</span>
+<span class="sd">    :param dict _pre_cal_enriched: A pre calculated enriched_centroid which comprised all necessary features will save time.</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">global_correlative_feas</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">sub_correlative_feas</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">metainfo</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;building network...&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;__iter__&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">fea</span><span class="p">):</span>
+        <span class="n">fea_batch</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fea</span><span class="p">)[::]</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">fea</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">fea_batch</span> <span class="o">=</span> <span class="p">[</span><span class="n">fea</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span>
+
+    <span class="k">for</span> <span class="n">fea</span> <span class="ow">in</span> <span class="n">fea_batch</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fea</span> <span class="ow">in</span> <span class="n">safe_scores</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_pre_cal_enriched</span><span class="p">:</span>
+                <span class="n">min_p_value</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_iter</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">p_value</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">min_p_value</span><span class="p">)</span>
+                <span class="n">enriched_centroid</span><span class="p">,</span> <span class="n">enriched_nodes</span> <span class="o">=</span> <span class="n">get_enriched_nodes</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">safe_scores</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">),</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">centroids</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">enriched_centroid</span> <span class="o">=</span> <span class="n">_pre_cal_enriched</span>
+            <span class="n">_global</span><span class="p">,</span> <span class="n">_local</span><span class="p">,</span> <span class="n">_meta</span> <span class="o">=</span> <span class="n">coenrichment_for_nodes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">enriched_centroid</span><span class="p">[</span><span class="n">fea</span><span class="p">],</span> <span class="n">fea</span><span class="p">,</span> <span class="n">enriched_centroid</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">)</span>
+            <span class="n">global_correlative_feas</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_global</span><span class="p">)</span>
+            <span class="n">sub_correlative_feas</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_local</span><span class="p">)</span>
+            <span class="n">metainfo</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_meta</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">global_correlative_feas</span><span class="p">,</span> <span class="n">sub_correlative_feas</span><span class="p">,</span> <span class="n">metainfo</span>
+
+
+<span class="k">def</span> <span class="nf">construct_correlative_metadata</span><span class="p">(</span><span class="n">fea</span><span class="p">,</span> <span class="n">global_correlative_feas</span><span class="p">,</span> <span class="n">sub_correlative_feas</span><span class="p">,</span> <span class="n">metainfo</span><span class="p">,</span> <span class="n">node_data</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Down-stream transformation of ``batch_coenrichment``.</span>
+<span class="sd">    :param fea:</span>
+<span class="sd">    :param global_correlative_feas:</span>
+<span class="sd">    :param sub_correlative_feas:</span>
+<span class="sd">    :param metainfo:</span>
+<span class="sd">    :param node_data:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Transforming given correlative relationship into human-readable DataFrame......&#39;</span><span class="p">)</span>
+    <span class="c1"># processing global correlative feas</span>
+    <span class="n">global_headers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;other feature&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;fisher-exact test pvalue&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;ranksum in co-enriched nodes&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;ranksum in others nodes&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;coverage/%&#39;</span><span class="p">,</span> <span class="p">]</span>
+
+    <span class="n">sub_headers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;n_comps&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;comps_size&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;other feature&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;Fisher test pvalue(co-enriched,enriched)&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;Fisher test pvalue(co-enriched,others)&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;coenriched-enriched pvalue&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;coenriched-others pvalue&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;enriched-others pvalue&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;coverage/%&#39;</span><span class="p">,</span>
+                   <span class="p">]</span>
+    <span class="n">global_corr_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">global_headers</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">o_f</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">global_correlative_feas</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">_1</span><span class="p">,</span> <span class="n">f_p</span> <span class="o">=</span> <span class="n">global_correlative_feas</span><span class="p">[</span><span class="n">o_f</span><span class="p">]</span>
+        <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span> <span class="o">=</span> <span class="n">metainfo</span><span class="p">[</span><span class="n">o_f</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">o_f</span> <span class="ow">in</span> <span class="n">node_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">_data</span> <span class="o">=</span> <span class="n">node_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error feature </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">o_f</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s1</span><span class="p">,</span> <span class="n">o_f</span><span class="p">]</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">set</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span><span class="p">),</span> <span class="n">o_f</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">fea</span> <span class="ow">in</span> <span class="n">node_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">_data</span> <span class="o">=</span> <span class="n">node_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error feature </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">o_f</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">_y1</span> <span class="o">=</span> <span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s1</span><span class="p">,</span> <span class="n">fea</span><span class="p">]</span>
+        <span class="n">_y2</span> <span class="o">=</span> <span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">set</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span><span class="p">),</span> <span class="n">fea</span><span class="p">]</span>
+        <span class="n">ranksum_p1</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">ranksums</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ranksum_p2</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">ranksums</span><span class="p">(</span><span class="n">_y1</span><span class="p">,</span> <span class="n">_y2</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">s3</span><span class="p">):</span>
+            <span class="n">coverage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">coverage</span> <span class="o">=</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">s2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">s3</span><span class="p">)))</span> <span class="o">*</span> <span class="mi">100</span>
+
+        <span class="n">global_corr_df</span> <span class="o">=</span> <span class="n">global_corr_df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">o_f</span><span class="p">,</span> <span class="n">f_p</span><span class="p">,</span> <span class="n">ranksum_p1</span><span class="p">,</span> <span class="n">ranksum_p2</span><span class="p">,</span> <span class="n">coverage</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="n">global_headers</span><span class="p">))</span>
+
+    <span class="c1"># processing subgraph correlative feas</span>
+    <span class="n">sub_corr_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">sub_headers</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n_c</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">o_f</span> <span class="ow">in</span> <span class="n">sub_correlative_feas</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">o_f</span> <span class="ow">in</span> <span class="n">node_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">_data</span> <span class="o">=</span> <span class="n">node_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error feature </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">o_f</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">coenriched_nodes</span><span class="p">,</span> <span class="n">enriched_nodes_o_f_enriched</span><span class="p">,</span> <span class="n">nonenriched_nodes_o_f_enriched</span> <span class="o">=</span> <span class="n">metainfo</span><span class="p">[(</span><span class="n">n_c</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">o_f</span><span class="p">)]</span>
+        <span class="n">f_p1</span><span class="p">,</span> <span class="n">f_p2</span> <span class="o">=</span> <span class="n">sub_correlative_feas</span><span class="p">[(</span><span class="n">n_c</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">o_f</span><span class="p">)]</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">coenriched_nodes</span><span class="p">,</span> <span class="n">o_f</span><span class="p">]</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">enriched_nodes_o_f_enriched</span><span class="p">,</span> <span class="n">o_f</span><span class="p">]</span>
+        <span class="n">y3</span> <span class="o">=</span> <span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">nonenriched_nodes_o_f_enriched</span><span class="p">,</span> <span class="n">o_f</span><span class="p">]</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">ranksums</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">ranksums</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y3</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="n">scs</span><span class="o">.</span><span class="n">ranksums</span><span class="p">(</span><span class="n">y2</span><span class="p">,</span> <span class="n">y3</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">coverage</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coenriched_nodes</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">coenriched_nodes</span><span class="p">,</span> <span class="n">enriched_nodes_o_f_enriched</span><span class="p">,</span> <span class="n">nonenriched_nodes_o_f_enriched</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="n">sub_corr_df</span> <span class="o">=</span> <span class="n">sub_corr_df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="s1">&#39;comps</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n_c</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">o_f</span><span class="p">,</span> <span class="n">f_p1</span><span class="p">,</span> <span class="n">f_p2</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">coverage</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="n">sub_headers</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">global_corr_df</span><span class="p">,</span> <span class="n">sub_corr_df</span>
+
+
+<div class="viewcode-block" id="pairwise_coenrichment"><a class="viewcode-back" href="../../../api.html#tmap.netx.coenrichment_analysis.pairwise_coenrichment">[docs]</a><span class="k">def</span> <span class="nf">pairwise_coenrichment</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">safe_scores</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">p_value</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">_pre_cal_enriched</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pair-wise calculation for co-enrichment of each feature found at safe_scores.</span>
+<span class="sd">    If _pre_cal_enriched was given, n_iter and p_value is not useless.</span>
+<span class="sd">    Or you should modify n_iter and p_value to fit the params you passed to ``SAFE`` algorithm.</span>
+
+<span class="sd">    :param graph:</span>
+<span class="sd">    :param dict safe_scores: A SAFE score output from ``SAFE_batch`` which must contain all values occur at fea.</span>
+<span class="sd">    :param int n_iter: Permutation times used at ``SAFE_batch``.</span>
+<span class="sd">    :param float p_value: The p-value to determine the enriched nodes.</span>
+<span class="sd">    :param dict _pre_cal_enriched: A pre calculated enriched_centroid which comprised all necessary features will save time.</span>
+<span class="sd">    :param verbose:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">safe_scores</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="n">safe_scores</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;building network...&#39;</span><span class="p">)</span>
+        <span class="n">iter_obj</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">safe_scores</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">iter_obj</span> <span class="o">=</span> <span class="n">safe_scores</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_pre_cal_enriched</span><span class="p">:</span>
+        <span class="n">min_p_value</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_iter</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">p_value</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">min_p_value</span><span class="p">)</span>
+        <span class="n">enriched_centroid</span><span class="p">,</span> <span class="n">enriched_nodes</span> <span class="o">=</span> <span class="n">get_enriched_nodes</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">safe_scores</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">),</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">centroids</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">enriched_centroid</span> <span class="o">=</span> <span class="n">_pre_cal_enriched</span>
+
+    <span class="k">for</span> <span class="n">fea</span> <span class="ow">in</span> <span class="n">iter_obj</span><span class="p">:</span>
+        <span class="n">_global</span><span class="p">,</span> <span class="n">_meta</span> <span class="o">=</span> <span class="n">coenrichment_for_nodes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">enriched_centroid</span><span class="p">[</span><span class="n">fea</span><span class="p">],</span> <span class="n">fea</span><span class="p">,</span> <span class="n">enriched_centroid</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;global&#39;</span><span class="p">,</span> <span class="n">_filter</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1"># _filter to fetch raw fisher-exact test result without any cut-off values.</span>
+        <span class="k">for</span> <span class="n">o_f</span> <span class="ow">in</span> <span class="n">safe_scores</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">fea</span> <span class="o">!=</span> <span class="n">o_f</span><span class="p">:</span>
+                <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span> <span class="o">=</span> <span class="n">_meta</span><span class="p">[</span><span class="n">o_f</span><span class="p">]</span>
+                <span class="n">oddsratio</span><span class="p">,</span> <span class="n">pvalue</span> <span class="o">=</span> <span class="n">_global</span><span class="p">[</span><span class="n">o_f</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">is_enriched</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span><span class="p">):</span>
+                    <span class="n">dist_matrix</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fea</span><span class="p">,</span> <span class="n">o_f</span><span class="p">]</span> <span class="o">=</span> <span class="n">pvalue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dist_matrix</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fea</span><span class="p">,</span> <span class="n">o_f</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">dist_matrix</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fea</span><span class="p">,</span> <span class="n">fea</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">dist_matrix</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Tianhua Liao, YuChen Wei, Haokui Zhou.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/language_data.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

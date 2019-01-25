@@ -1,0 +1,404 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Basic Usage of tmap &mdash; tmap 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="How to Choose Parameters in tmap" href="param.html" />
+    <link rel="prev" title="Welcome to tmap’s documentation!" href="index.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> tmap
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Basic Usage of <em>tmap</em></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-simple-case">A Simple Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-different-distance-metric">Using Different Distance Metric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tda-network-visualization-and-coloring">TDA Network Visualization and Coloring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#network-enrichment-and-the-safe-score">Network Enrichment and the SAFE score</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#safe-statistical-summary">SAFE Statistical Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#network-based-co-enrichment-analysis">Network-based co-enrichment Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="param.html">How to Choose Parameters in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="vis.html">Visualizing and Exploring TDA Network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statistical.html">Network Statistical Analysis in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="how2work.html">How <em>tmap</em> work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Microbiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tmap</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Basic Usage of <em>tmap</em></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/basic.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="basic-usage-of-tmap">
+<h1>Basic Usage of <em>tmap</em><a class="headerlink" href="#basic-usage-of-tmap" title="Permalink to this headline">¶</a></h1>
+<p>This guide is to help you start working with <strong>tmap</strong>.</p>
+<p>High dimension and complex data are common in modern biological science, especially in omics studies. To successfully apply machine learning techniques in this scenario, we need to perform dimensionality reduction to have a lower dimensional representation of the data. The learned low-dimensional features can then be used for visualization or as input for regression / classification analysis.</p>
+<p><strong>tmap</strong> is a method which can be used to reduce high dimensional data sets into simplicial complexes with far fewer representative data points (as nodes in a TDA network), which capture topological information (” the shape of data”) at a specified resolution.</p>
+<p>Let’s start a <strong>tmap</strong> analysis by using a simplest case, to get you familiar with the basic steps and the overall workflow.</p>
+<div class="section" id="a-simple-case">
+<h2>A Simple Case<a class="headerlink" href="#a-simple-case" title="Permalink to this headline">¶</a></h2>
+<p>Using the classical <em>iris</em> dataset as a simple example. This case is use to demonstrate the general usage of <strong>tmap</strong> with simplicity in mind. The same approach can also be applied to microbiome data analysis, which will be demonstrated in this documentation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">datasets</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="n">iris</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_iris</span><span class="p">()</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">data</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">columns</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Once we have prepared input data (in <em>pandas DataFrame</em> or a <em>numpy matrix</em>), we can proceed to initiate the basic instances for TDA analysis, including <code class="docutils literal notranslate"><span class="pre">Mapper</span></code>, <code class="docutils literal notranslate"><span class="pre">filter</span></code>, <code class="docutils literal notranslate"><span class="pre">cluster</span></code> and <code class="docutils literal notranslate"><span class="pre">Cover</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tmap.tda</span> <span class="kn">import</span> <span class="n">mapper</span><span class="p">,</span> <span class="nb">filter</span>
+<span class="kn">from</span> <span class="nn">tmap.tda.cover</span> <span class="kn">import</span> <span class="n">Cover</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">DBSCAN</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span><span class="p">,</span><span class="n">MinMaxScaler</span>
+<span class="c1"># Step1. initiate a Mapper</span>
+<span class="n">tm</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="n">Mapper</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Step2. Projection</span>
+<span class="n">lens</span> <span class="o">=</span> <span class="p">[</span><span class="nb">filter</span><span class="o">.</span><span class="n">MDS</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span><span class="n">random_state</span><span class="o">=</span><span class="mi">100</span><span class="p">)]</span>
+<span class="n">projected_X</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">lens</span><span class="o">=</span><span class="n">lens</span><span class="p">)</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">DBSCAN</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">min_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">cover</span> <span class="o">=</span> <span class="n">Cover</span><span class="p">(</span><span class="n">projected_data</span><span class="o">=</span><span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">projected_X</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After preparing the required instances and input data, the <code class="docutils literal notranslate"><span class="pre">map</span></code> function of the <code class="docutils literal notranslate"><span class="pre">Mapper</span></code> object can be called to return a TDA graph (or TDA network). A <em>graph</em> is a collection of nodes (vertices) along with identified pairs of nodes (edges). For now, we use nest dictionary as a container to store all the information of a TDA graph, which will be used for TDA network visualization and statistical analysis.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">cover</span><span class="o">=</span><span class="n">cover</span><span class="p">,</span> <span class="n">clusterer</span><span class="o">=</span><span class="n">clusterer</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The generated graph consists of 201 nodes and 1020 edges, which can be obtained by:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]),</span><span class="nb">len</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">]))</span>
+
+<span class="mi">197</span> <span class="mi">913</span>
+</pre></div>
+</div>
+<p>Each node represents a group of samples, generated from the clustering step. Mapping between TDA nodes and samples can be found by:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+<span class="n">dict_items</span><span class="p">([</span>
+<span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">array</span><span class="p">([</span><span class="mi">105</span><span class="p">])),</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">array</span><span class="p">([</span><span class="mi">105</span><span class="p">,</span> <span class="mi">118</span><span class="p">,</span> <span class="mi">122</span><span class="p">])),</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">array</span><span class="p">([</span><span class="mi">131</span><span class="p">])),</span>
+<span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">array</span><span class="p">([</span><span class="mi">105</span><span class="p">,</span> <span class="mi">118</span><span class="p">,</span> <span class="mi">122</span><span class="p">])),</span>
+<span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">array</span><span class="p">([</span><span class="mi">117</span><span class="p">,</span> <span class="mi">131</span><span class="p">])),</span>
+<span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">array</span><span class="p">([</span><span class="mi">117</span><span class="p">,</span> <span class="mi">131</span><span class="p">])),</span>
+<span class="o">......</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>As above, keys in the returned items are node IDs, and the values are sample index in the original input data.</p>
+</div>
+<div class="section" id="using-different-distance-metric">
+<h2>Using Different Distance Metric<a class="headerlink" href="#using-different-distance-metric" title="Permalink to this headline">¶</a></h2>
+<p>After introducing the basic usage of <strong>tmap</strong>, we now delve into the details of each class. We may want to use a different distance metric instead of the default (<em>Euclidean</em>) distance metric. Particularly in microbiome data analysis, the weighted or unweighted UniFrac distance metric can be used.</p>
+<p>For using custom distance metric from a precomputed distance matrix, you need to set the <cite>metric</cite> parameter as <strong>“precomputed”</strong> when initiating a <code class="docutils literal notranslate"><span class="pre">filter</span></code> object.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">pdist</span><span class="p">,</span><span class="n">squareform</span>
+<span class="kn">from</span> <span class="nn">tmap.tda.metric</span> <span class="kn">import</span> <span class="n">Metric</span>
+<span class="n">lens</span> <span class="o">=</span> <span class="p">[</span><span class="nb">filter</span><span class="o">.</span><span class="n">MDS</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span><span class="n">metric</span><span class="o">=</span><span class="n">Metric</span><span class="p">(</span><span class="s1">&#39;precomputed&#39;</span><span class="p">))]</span>
+<span class="n">my_dist</span> <span class="o">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">pdist</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="n">metric</span><span class="o">=</span><span class="s2">&quot;braycurtis&quot;</span><span class="p">))</span>
+<span class="n">projected_X</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">my_dist</span><span class="p">,</span> <span class="n">lens</span><span class="o">=</span><span class="n">lens</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A <code class="docutils literal notranslate"><span class="pre">filter</span></code> is a general technique to project data points from the original data space onto a low dimensional space. Different filter preserves different aspect of the original dataset, such as MDS, which try to preserve distances between data points. Therefore, a <code class="docutils literal notranslate"><span class="pre">filter</span></code> provides a <em>view</em> of the data to look through. Multiple <em>views</em> can be joined to present the data for topological analysis. Choice of filter depends on the studied dataset and research purpose. Projection of the original dataset using a specified filter has a global effect in determining the TDA network structure.</p>
+<p>Different filters can be generated and combined into a <code class="docutils literal notranslate"><span class="pre">lens</span></code> using a Python list, and within each filter, different components can be specified with a index list. There are various filters implemented in the <cite>filter</cite> module, including PCA, MDS, and t-SNE. More filters can be easily incorporated using the defined APIs.</p>
+</div>
+<div class="section" id="tda-network-visualization-and-coloring">
+<h2>TDA Network Visualization and Coloring<a class="headerlink" href="#tda-network-visualization-and-coloring" title="Permalink to this headline">¶</a></h2>
+<p>After constructing a TDA graph, it is very useful and insightful to visualize the network for pattern discovery.
+We built wrapper classes around <cite>networkx</cite> and <cite>matplolib</cite> to facilitate TDA network visualization for different target features using a specified color mapping object.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tmap.tda.plot</span> <span class="kn">import</span> <span class="n">show</span><span class="p">,</span> <span class="n">Color</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">target</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;categorical&quot;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">node_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;spring&#39;</span><span class="p">,</span> <span class="n">strength</span><span class="o">=</span><span class="mf">0.04</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="Iris tmap network" src="_images/iris_basic_example1.png" />
+<p>Depending on the type of target data, there are two types of color mappings (<code class="docutils literal notranslate"><span class="pre">categorical</span></code> or <code class="docutils literal notranslate"><span class="pre">numerical</span></code>) we can choose. If we have a binary/continuous numeric feature, we recommend using the <code class="docutils literal notranslate"><span class="pre">numerical</span></code> type to show a ‘<em>node averaged</em>’ distribution of the target feature among the network. For a binary feature, the value of a node indicates the ratio of <code class="docutils literal notranslate"><span class="pre">True</span></code> among all samples in the node for the feature.
+For a multi-classes feature, you should use the <code class="docutils literal notranslate"><span class="pre">categorical</span></code> type to visualize the most-abundant category for each node. As an alternative, you can also use the <em>One-Hot encoding</em> method to transform a multi-classes feature into multiple binary features and then examine them individually using a <code class="docutils literal notranslate"><span class="pre">numerical</span></code> color map.</p>
+</div>
+<div class="section" id="network-enrichment-and-the-safe-score">
+<h2>Network Enrichment and the SAFE score<a class="headerlink" href="#network-enrichment-and-the-safe-score" title="Permalink to this headline">¶</a></h2>
+<p>After obtaining a TDA graph, we can explore network structures associated with the dataset and perform network based statistical analysis. One straightforward way is to use network enrichment analysis to understand how a target feature is enriched locally with a subset of nodes and groups of samples, or how the target feature vary among the whole network to have a global picture.
+We adopted the SAFE (Spatial Analysis of Functional Enrichment) algorithm for the calculation of a SAFE score for each node, given a specified target feature. Target feature can be a dependent variable for a supervised learning task, or can be a independent variable to identify the most distinctive attributes for a group of samples in the network.</p>
+<p>First, we plot and color the first feature (<code class="docutils literal notranslate"><span class="pre">sepal</span> <span class="pre">length</span></code>) of the iris dataset on the TDA network.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;numerical&quot;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">node_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;spring&#39;</span><span class="p">,</span> <span class="n">strength</span><span class="o">=</span><span class="mf">0.13</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="Iris tmap network with target feature" src="_images/iris_basic_example2.png" />
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tmap.tda.plot</span> <span class="kn">import</span> <span class="n">vis_progressX</span><span class="p">,</span> <span class="n">Color</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;numerical&quot;</span><span class="p">)</span>
+<span class="n">vis_progressX</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span><span class="n">projected_X</span><span class="p">,</span><span class="n">simple</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;file&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">Color</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;numerical&quot;</span><span class="p">),</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;example1.html&#39;</span><span class="p">,</span><span class="n">auto_open</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<iframe src="_static/example1.html" height="500px" width="100%"></iframe><p>From the above figure, feature coloring shows that <code class="docutils literal notranslate"><span class="pre">sepal</span> <span class="pre">length</span></code> is strongly associated with the network structure (range of the <code class="docutils literal notranslate"><span class="pre">sepal</span> <span class="pre">length</span></code> values and their color mapping are indicated by the color legend on the right-hand side). Then we can use the SAFE algorithm to transform the raw feature values to network-based statistical scores (log10-transformed p-values).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tmap.netx.SAFE</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">safe_scores</span> <span class="o">=</span> <span class="n">SAFE_batch</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">meta_data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">nr_threshold</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">safe_scores</span><span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span><span class="n">target_by</span><span class="o">=</span><span class="s2">&quot;node&quot;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">node_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;spring&#39;</span><span class="p">,</span> <span class="n">strength</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="Iris tmap network with SAFE scor" src="_images/iris_basic_example3.png" />
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tmap.netx.SAFE</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">safe_scores</span> <span class="o">=</span> <span class="n">SAFE_batch</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">meta_data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">nr_threshold</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">safe_scores</span><span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span><span class="n">target_by</span><span class="o">=</span><span class="s2">&quot;node&quot;</span><span class="p">)</span>
+<span class="n">vis_progressX</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span><span class="n">projected_X</span><span class="p">,</span><span class="n">simple</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;file&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;example2.html&#39;</span><span class="p">,</span><span class="n">auto_open</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<iframe src="_static/example2.html" height="500px" width="100%"></iframe><p>Instead of coloring based on original feature value, the SAFE score colors can help to reveal significantly enriched nodes in the network, which can be extracted for further analysis. Regarding the details of the SAFE algorithm and SAFE score, please see <a class="reference internal" href="how2work.html"><span class="doc">How tmap work</span></a>.</p>
+</div>
+<div class="section" id="safe-statistical-summary">
+<h2>SAFE Statistical Summary<a class="headerlink" href="#safe-statistical-summary" title="Permalink to this headline">¶</a></h2>
+<p>In addition to the use of SAFE score for feature coloring and visualization, various network enrichment statistics can be calculated and summarized for each target feature, based on the SAFE algorithm. These statistics are useful for ranking and filtering of significant features associated with the TDA network, together with their strength of association/enrichment. The selected features are expected to explain the network structure, and therefore ‘<em>the shape of data</em>’.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tmap.netx.SAFE</span> <span class="kn">import</span> <span class="n">get_SAFE_summary</span>
+
+<span class="n">safe_summary</span> <span class="o">=</span> <span class="n">get_SAFE_summary</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">meta_data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">safe_scores</span><span class="o">=</span><span class="n">safe_scores</span><span class="p">,</span>
+                                <span class="n">n_iter_value</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">p_value</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the above code, a p-value threshold of <code class="docutils literal notranslate"><span class="pre">0.01</span></code> was set to select significant nodes for the calculation of <code class="docutils literal notranslate"><span class="pre">SAFE</span> <span class="pre">enriched</span> <span class="pre">score</span></code> and <code class="docutils literal notranslate"><span class="pre">enriched</span> <span class="pre">SAFE</span> <span class="pre">score</span> <span class="pre">ratio</span></code>, which can be used to rank the importance and filter the significance of features associated with the TDA network. For more details on SAFE summary, please see <a class="reference internal" href="how2work.html"><span class="doc">How tmap work</span></a>.</p>
+</div>
+<div class="section" id="network-based-co-enrichment-analysis">
+<h2>Network-based co-enrichment Analysis<a class="headerlink" href="#network-based-co-enrichment-analysis" title="Permalink to this headline">¶</a></h2>
+<p>Rather than analyzing each feature individually, by testing their association/co-enrichment with TDA network, we could also examine co-enrichment relationships between features with fisher-exact test among the overlapped enriched area.</p>
+<blockquote>
+<div><p>A straightforward approach is to perform a standard correlation analysis (such as Pearson correlation) based on the SAFE scores, rather than the original values. But it also introduces other problems such as zero features.</p>
+<p>Upon the enriched area of two different feature or genera, we could construct a simple contingency tables with enriched/non-enriched and A/B features. It will output a p-value between each pair of features and form a distance matrix.</p>
+</div></blockquote>
+<p>With SAFE scores and a corresponding TDA graph, <em>p-value</em> and <em>correlation coefficient</em> of each pair of features are calculated by Fisher-exact test and corrected by FDR (Benjamini/Hochberg).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tmap.netx.coenrichment_analysis</span> <span class="kn">import</span> <span class="n">pairwise_coenrichment</span>
+<span class="kn">from</span> <span class="nn">tmap.netx.SAFE</span> <span class="kn">import</span> <span class="n">get_enriched_nodes</span>
+<span class="n">enriched_centroides</span><span class="p">,</span> <span class="n">enriched_nodes</span> <span class="o">=</span> <span class="n">get_enriched_nodes</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span><span class="n">safe_scores</span><span class="o">=</span><span class="n">safe_scores</span><span class="p">,</span><span class="n">centroids</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">asso_pairs</span> <span class="o">=</span> <span class="n">pairwise_coenrichment</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span><span class="n">safe_scores</span><span class="p">,</span><span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">p_value</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span><span class="n">_pre_cal_enriched</span><span class="o">=</span><span class="n">enriched_centroides</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">statsmodels.sandbox.stats.multicomp</span> <span class="kn">import</span> <span class="n">multipletests</span>
+<span class="n">corrected_fe_dis</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">multipletests</span><span class="p">(</span><span class="n">asso_pairs</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">asso_pairs</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                            <span class="n">index</span><span class="o">=</span><span class="n">asso_pairs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                            <span class="n">columns</span><span class="o">=</span><span class="n">asso_pairs</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="param.html" class="btn btn-neutral float-right" title="How to Choose Parameters in tmap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to tmap’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Tianhua Liao, YuChen Wei, Haokui Zhou.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

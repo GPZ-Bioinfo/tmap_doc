@@ -15,9 +15,11 @@ API
 
 .. autofunction:: tmap.tda.plot.show
 
+.. autofunction:: tmap.tda.plot.vis_progressX
+
 .. autofunction:: tmap.netx.SAFE.SAFE_batch
 
-.. autofunction:: tmap.netx.coenrich.coenrich
+.. autofunction:: tmap.netx.coenrichment_analysis.pairwise_coenrichment
 
 .. autofunction:: tmap.tda.utils.output_graph
 

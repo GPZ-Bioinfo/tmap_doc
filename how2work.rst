@@ -3,6 +3,10 @@ How *tmap* work
 
 **Topological data analysis** (**TDA**) is the application of topological analysis techniques to study datasets in high dimensional space, to capture topological properties of a dataset which are invariant to noise and scales. Currently, there are two common techniques of TDA: **persistent homology** and the **Mapper** algorithm. **tmap** is an implementation of the *Mapper* algorithm in Python, and is a TDA framework designed from microbiome data analysis. Because of the generality of the framework, *tmap* can also be used to analyze high dimensional datasets other than microbiome. [Ref1]_
 
+.. image:: img/Figure1.png
+    :alt: tmap workflow
+    :align: center
+
 Compared with other *Mapper* software, *tmap* was designed with the following advantageous features, especially for analyzing microbiome dataset:
 
 1. Outputs from standard microbiome analysis pipelines, such as QIIME and USEARCH, can be used as direct inputs into *tmap*. Particularly, various precomputed beta-diversity distance matrices can be reused by *tmap*. Other customized and precomputed distance matrix, dimension reduction results, can also be used as input into *tmap* to save computation time.
@@ -40,21 +44,25 @@ The **SAFE** algorithm takes the following steps to calculate an enrichment scor
 
 2. For each node ``u`` in the network, SAFE defines the local neighborhood of ``u`` by identifying any other nodes that are closer than a maximum distance threshold (`d`) to ``u``. Node distance is measured using either the **weighted shortest path length** or the **unweighted shortest path length**. By default, the maximum distance threshold ``d`` equals to the 0.5th-percentile of all pair-wise node distances in the network.
 
-3. For each neighborhood, SAFE sums the values of neighbor nodes for a functional attribute of interest (a target variable) as a neighborhood score ``P``. The score is then compared to a distribution of ``I`` random neighborhood scores obtained by shuffling the target variable of nodes in the network **independently**. The significance of enrichment is determined as the probability that a random observation from the distribution will fall into the interval between the origin neighborhood score (``P``) and infinite.
+3. For each neighborhood, SAFE sums the values of neighbor nodes for a functional attribute of interest (a target variable) as a neighborhood score. The score is then compared to a distribution of ``n`` random neighborhood scores obtained by shuffling the target variable of nodes in the network **independently**. The significance of enrichment is determined as the probability that a random observation from the distribution will fall into the interval between the origin neighborhood score (**Observed values**) and infinite.
 
 4. Convert neighborhood significance p-values into neighborhood enrichment scores ``O``, normalized to a range from 0 to 1, by computing:
 
 .. math::
 
-    O_{n} = \frac{-log_{10}(max(P_{n},\frac{1}{I+1}))}{-log_{10}\frac{1}{I+1}}
+    P = \frac{m}{n}
 
-where ``I`` is the times of permutations, ``P`` is the neighborhood score of node *n*, ``O`` is the neighborhood enrichment score of node *n*. This permutation is performed independently for each target variable when there are more than one.
+.. math::
+
+    O_{n} = \frac{-log_{10}(max(P_{n},\frac{1}{n+1}))}{-log_{10}\frac{1}{n+1}}
+
+where ``n`` is the times of permutations, ``m`` is number of times a observed value is greater than or equal to shuffled values, ``O`` is the neighborhood enrichment score of node *n*. This permutation is performed independently for each target variable when there are more than one.
 
 5. A node is considered significantly enriched given a p-value threshold of ``0.05`` if:
 
 .. math::
 
-    O_{n} \ge \frac{-\log_{10} 0.05}{-\log_{10} \frac{1}{I+1}}
+    O_{n} \ge \frac{-\log_{10} 0.05}{-\log_{10} \frac{1}{n+1}}
 
 6. Filter and rank target variables using **number of significant nodes** or **sum of SAFE score of significant nodes** (for more details on SAFE score summary please see the following **SAFE summary in tmap**).
 

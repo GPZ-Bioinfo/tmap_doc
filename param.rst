@@ -18,7 +18,7 @@ In the following code, we compare the effects of choosing different components f
     from sklearn.cluster import DBSCAN
     from tmap.tda import mapper, filter
     from tmap.tda.cover import Cover
-    from tmap.tda.plot import show, Color
+    from tmap.tda.plot import show, Color,vis_progressX
 
 
     iris = datasets.load_iris()
@@ -37,7 +37,8 @@ In the following code, we compare the effects of choosing different components f
     cover = Cover(projected_data=MinMaxScaler().fit_transform(projected_X), resolution=20, overlap=0.75)
     graph = tm.map(data=StandardScaler().fit_transform(X), cover=cover, clusterer=clusterer)
 
-    show(data=X,graph=graph, color='b', fig_size=(10, 10), node_size=15, mode='spring', strength=0.03)
+    vis_progressX(graph,X,simple=True,mode='file',filename='_static/comp1.html')
+    #show(data=X,graph=graph, color='b', fig_size=(10, 10), node_size=15, mode='spring', strength=0.15)
 
 .. code-block:: python
 
@@ -52,10 +53,11 @@ In the following code, we compare the effects of choosing different components f
     ...create 1133 edges.
     Finish TDA mapping
 
-.. image:: img/param/comp1.png
-    :alt: iris tmap filter result1
-    :scale: 40 %
-    :align: center
+
+.. raw:: html
+
+    <iframe src="_static/comp1.html" height="500px" width="100%"></iframe>
+
 
 Using two components of MDS as *lens*, *tmap* generates a graph with 219 nodes and 1133 edges.
 *Note: component index is 0-based, and the first component is indexed by 0*.
@@ -69,7 +71,7 @@ What if we choose three components of MDS?
     from sklearn.cluster import DBSCAN
     from tmap.tda import mapper, filter
     from tmap.tda.cover import Cover
-    from tmap.tda.plot import show
+    from tmap.tda.plot import show,vis_progressX,Color
 
     iris = datasets.load_iris()
     X = iris.data
@@ -87,7 +89,8 @@ What if we choose three components of MDS?
     cover = Cover(projected_data=MinMaxScaler().fit_transform(projected_X), resolution=20, overlap=0.75)
     graph = tm.map(data=StandardScaler().fit_transform(X), cover=cover, clusterer=clusterer)
 
-    show(data=X,graph=graph, color='b', fig_size=(10, 10), node_size=15, mode='spring', strength=0.17)
+    vis_progressX(graph,X,simple=True,mode='file',filename='_static/comp2.html')
+
 
 
 .. code-block:: python
@@ -103,10 +106,9 @@ What if we choose three components of MDS?
     ...create 13279 edges.
     Finish TDA mapping
 
-.. image:: img/param/comp2.png
-    :alt: iris tmap filter result2
-    :scale: 40 %
-    :align: center
+.. raw:: html
+
+    <iframe src="_static/comp2.html" height="500px" width="100%"></iframe>
 
 The resulted graph has 921 nodes and 13279 edges. Increasing number of components makes the graph more densely connected with more nodes. If we compare these two graphs visually, we could see that the general topological structure is similar. But the more ``components`` you used, the more complicated a graph will be generated. We recommend the default parameter ``components=[0,1]`` in most situations.
 

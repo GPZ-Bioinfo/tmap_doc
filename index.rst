@@ -32,7 +32,7 @@ Contents
 ##########
 
 .. toctree::
-   :maxdepth: 1
+   :glob:
 
    basic.rst
    param.rst

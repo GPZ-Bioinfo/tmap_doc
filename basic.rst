@@ -122,22 +122,47 @@ First, we plot and color the first feature (``sepal length``) of the iris datase
 .. code-block:: python
 
     color = Color(target=X.iloc[:,0], dtype="numerical")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.04)
+    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.13)
 
 .. image:: img/iris_basic_example2.png
     :alt: Iris tmap network with target feature
+
+
+.. code-block:: python
+
+    from tmap.tda.plot import vis_progressX, Color
+    color = Color(target=X.iloc[:,0], dtype="numerical")
+    vis_progressX(graph,projected_X,simple=True,mode='file',color=Color(target=X.iloc[:,0], dtype="numerical"),filename='example1.html',auto_open=False)
+
+
+.. raw:: html
+
+    <iframe src="_static/example1.html" height="500px" width="100%"></iframe>
 
 From the above figure, feature coloring shows that ``sepal length`` is strongly associated with the network structure (range of the ``sepal length`` values and their color mapping are indicated by the color legend on the right-hand side). Then we can use the SAFE algorithm to transform the raw feature values to network-based statistical scores (log10-transformed p-values).
 
 .. code-block:: python
 
     from tmap.netx.SAFE import *
-    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000, threshold=0.05)
+    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000, nr_threshold=0.05)
     color = Color(target=safe_scores[X.columns[0]], dtype="numerical",target_by="node")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.04)
+    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.15)
 
 .. image:: img/iris_basic_example3.png
     :alt: Iris tmap network with SAFE scor
+
+
+.. code-block:: python
+
+    from tmap.netx.SAFE import *
+    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000, nr_threshold=0.05)
+    color = Color(target=safe_scores[X.columns[0]], dtype="numerical",target_by="node")
+    vis_progressX(graph,projected_X,simple=True,mode='file',color=color, dtype="numerical",filename='example2.html',auto_open=False)
+
+
+.. raw:: html
+
+    <iframe src="_static/example2.html" height="500px" width="100%"></iframe>
 
 Instead of coloring based on original feature value, the SAFE score colors can help to reveal significantly enriched nodes in the network, which can be extracted for further analysis. Regarding the details of the SAFE algorithm and SAFE score, please see :doc:`how2work`.
 
@@ -156,14 +181,24 @@ In addition to the use of SAFE score for feature coloring and visualization, var
 
 In the above code, a p-value threshold of ``0.01`` was set to select significant nodes for the calculation of ``SAFE enriched score`` and ``enriched SAFE score ratio``, which can be used to rank the importance and filter the significance of features associated with the TDA network. For more details on SAFE summary, please see :doc:`how2work`.
 
-Network-based Association Analysis
+Network-based co-enrichment Analysis
 =========================================
 
-Rather than analyzing each feature individually, by testing their association/enrichment with TDA network, we can also examine relationships between features, given an underlaying 'shape of data'. A straightforward approach is to perform a standard correlation analysis (such as Pearson correlation) based on the SAFE scores, rather than the original values. It is worth noting that, this network-based association analysis treating each node as an observation, instead of taking each sample (original data point) as an observation.
+Rather than analyzing each feature individually, by testing their association/co-enrichment with TDA network, we could also examine co-enrichment relationships between features with fisher-exact test among the overlapped enriched area.
 
-With SAFE scores and a corresponding TDA graph, *p-value* and *correlation coefficient* of each pair of features are calculated by Pearson's correlation and corrected by FDR (Benjamini/Hochberg) correction.
+ A straightforward approach is to perform a standard correlation analysis (such as Pearson correlation) based on the SAFE scores, rather than the original values. But it also introduces other problems such as zero features.
+
+ Upon the enriched area of two different feature or genera, we could construct a simple contingency tables with enriched/non-enriched and A/B features. It will output a p-value between each pair of features and form a distance matrix.
+
+With SAFE scores and a corresponding TDA graph, *p-value* and *correlation coefficient* of each pair of features are calculated by Fisher-exact test and corrected by FDR (Benjamini/Hochberg).
 
 .. code-block:: python
 
-    from tmap.netx.coenrich import coenrich
-    asso_pairs = coenrich(graph,safe_scores)
+    from tmap.netx.coenrichment_analysis import pairwise_coenrichment
+    from tmap.netx.SAFE import get_enriched_nodes
+    enriched_centroides, enriched_nodes = get_enriched_nodes(graph=graph,safe_scores=safe_scores,centroids=True)
+    asso_pairs = pairwise_coenrichment(graph,safe_scores,n_iter=1000,p_value=0.05,_pre_cal_enriched=enriched_centroides)
+    from statsmodels.sandbox.stats.multicomp import multipletests
+    corrected_fe_dis = pd.DataFrame(multipletests(asso_pairs.values.reshape(-1,), method='fdr_bh')[1].reshape(asso_pairs.shape),
+                                index=asso_pairs.index,
+                                columns=asso_pairs.columns)

@@ -1,6 +1,15 @@
 Microbiome Examples
 #########################
 
+The three published cohort data analysis pipelines was packaged into three ipython notebooks at github.
+You could access these by:
+
+1. `FGFP notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/FGFP/FGFP_pipelines.ipynb>`_
+2. `AGP notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/AGP/AGP_pipelines.ipynb>`_
+3. `EMP notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/EMP/EMP_pipelines.ipynb>`_
+4. `Simulation mixed type notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/Simulation/Simulate_mixed.ipynb>`_
+
+
 Analyzing the population-scale FGFP microbiome dataset
 ==============================================================
 
@@ -40,7 +49,7 @@ To demonstrate and validate the performance of *tmap*, we benchmarked the result
     graph = tm.map(data=X, cover=cover, clusterer=clusterer)
     print('Graph covers %.2f percentage of samples.' % cover_ratio(graph,X))
     n_iter = 1000
-    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=n_iter, threshold=0.05)
+    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=n_iter)
 
 
 Driver species analysis
@@ -151,7 +160,7 @@ First, we take the metadata of ``COLLECTION_DAY`` as our target variable to be m
 
     target_feature = 'COLLECTION_DAY'
     color = Color(target=metadata.loc[:, target_feature], dtype="numerical", target_by="sample")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.03)
+    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.13)
 
 The following figure shows how the fecal microbiome changes with the ``COLLECTION_DAY`` for the two studied subjects.
 
@@ -164,10 +173,10 @@ Next, we can map ``HOST_SUBJECT_ID`` to the TDA network to show inter-individual
 
     target_feature = 'HOST_SUBJECT_ID'
     color = Color(target=metadata.loc[:, target_feature], dtype="categorical", target_by="sample")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.03)
+    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.13)
 
     color = Color(target=metadata.loc[:, target_feature], dtype="numerical", target_by="sample")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.03)
+    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.13)
 
 
 .. image:: img/example/Daily_host_compare.png
@@ -181,7 +190,7 @@ The main focus of the original study is to associate changes in microbiome with 
         target_vals = [1 if metadata.loc[_,"HOST_SUBJECT_ID"]=="2202:Donor%s" % sample and metadata.loc[_,"COLLECTION_DAY"] in list(range(start,end+1)) else 0 for _ in X.index]
         color = Color(target=target_vals, dtype="numerical", target_by="sample")
         show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.03)
-        title("Subject %s at day %s to %s" % (sample,start,end))
+        #title("Subject %s at day %s to %s" % (sample,start,end))
     # Travel period
     time_range("A",70,123)
     # First diarrheal illness

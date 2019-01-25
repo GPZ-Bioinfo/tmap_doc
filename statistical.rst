@@ -10,7 +10,6 @@ The following codes show how SAFE scores help to identify enriched nodes with si
 
 .. code-block:: python
 
-    from __future__ import print_function
     import os
     from sklearn.preprocessing import MinMaxScaler
     from sklearn.cluster import DBSCAN
@@ -45,21 +44,32 @@ The following codes show how SAFE scores help to identify enriched nodes with si
     ## Step 6. SAFE test for every features.
     target_feature = 'Bacteroides'
     n_iter = 1000
-    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=n_iter, threshold=0.05)
+    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=n_iter)
 
     def visu_temp(target_feature,dtype='numerical',strength=0.04):
         color = Color(target=X.loc[:, target_feature], dtype=dtype, target_by="sample")
         show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=strength)
-        title('Abundance of ' + target_feature)
+        #title('Abundance of ' + target_feature)
         color = Color(target=safe_scores[target_feature], dtype=dtype, target_by="node")
         show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=strength)
-        title('SAFE score of ' +target_feature)
+        #title('SAFE score of ' +target_feature)
 
     visu_temp(target_feature,dtype='numerical',strength=0.08)
 
-
 .. image:: img/association/ab2SAFE_Bacteroides.png
     :align: center
+
+Of course, besides the visualization based on ``matplotlib``, you could also use ``tm_plot`` or ``vis_progressX`` to visualize it.
+
+.. code-block:: python
+
+    from tmap.tda.plot import vis_progressX,tm_plot,Color
+    color = Color(target=safe_scores[target_feature], dtype='numerical', target_by="node")
+    tm_plot(graph,projected_X,color=color,filename='_static/SAFE_Bacteroides.html',auto_open=False)
+
+.. raw:: html
+
+    <iframe src="_static/SAFE_Bacteroides.html" height="800px" width="100%"></iframe>
 
 Network-based Co-enrichment Analysis
 ========================================
@@ -86,6 +96,37 @@ Mutually exclusive relationship between driver species can also be identified vi
 Network-based Association Analysis
 =======================================
 
-*tmap* calculates SAFE scores for each node, given a target variable. We have implemented the `SAFE_batch` function in *tmap* for batch calculation for many target variables at the same time. For target variables, they can be either species abundance or sample metadata. In this way, *tmap* provides two transformations on the input data. First, it transforms raw values to SAFE scores for a target variable. Meanwhile, it transforms samples into nodes, which are aggregations of a group of samples.
+*tmap* calculates SAFE scores for each node, given a target variable. We have implemented the `SAFE_batch` function in *tmap* for batch calculation for many target variables at the same time.
 
-Therefore, we can perform a network-based association analysis for any pair of target variables, using SAFE scores on nodes. To do this, the output of SAFE scores for target variables can be used as input data to any association analysis method, such Pearson's association analysis. In our analysis of the FGFP microbiome dataset, this network-based association analysis can detect 'species-metdata' associations with improved statistical power and effect size, compared to other methods.
+For target variables, they can be either species abundance or sample metadata. In this way, *tmap* provides two transformations on the input data. First, it transforms raw values to SAFE scores for a target variable. Meanwhile, it transforms samples into nodes, which are aggregations of a group of samples.
+
+As below,
+
+.. code-block:: python
+
+    from tmap.netx.SAFE import SAFE_batch
+    n_iter = 1000
+    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=n_iter)
+
+When we get the SAFE score which represented enrichment scale of specific feature, we could use a hard filter from assigned p-value to filter out a enriched region/nodes.
+
+.. code-block:: python
+
+    from tmap.netx.SAFE import get_enriched_nodes
+    enriched_centroides, enriched_nodes = get_enriched_nodes(graph,safe_scores,centroids=True)
+
+Default, the function ``get_enriched_nodes`` only output the enriched nodes around the centroides. The difference between **neighborhood** and **centroides** could be find out at SAFE algorithm of :doc:`'How tmap work'<how2work>`.
+
+Upon the enriched area, we can perform a network-based co-enrichment relationship analysis for any pair of target variables. To do this, contingency tables with enriched/non-enriched and A/B features between each pairs of features was constructed. Fisher-exact test was performed based on each contingency table and corrected with by FDR (Benjamini/Hochberg).
+
+.. code-block:: python
+
+    from tmap.netx.coenrichment_analysis import pairwise_coenrichment
+    from tmap.netx.SAFE import get_enriched_nodes
+    asso_pairs = pairwise_coenrichment(graph,safe_scores,n_iter=1000,p_value=0.05,_pre_cal_enriched=enriched_centroides)
+    # pre_cal_enriched could be none, and it will be calculated inside the pairwise_coenrichment function.
+    from statsmodels.sandbox.stats.multicomp import multipletests
+    import pandas as pd
+    corrected_fe_dis = pd.DataFrame(multipletests(asso_pairs.values.reshape(-1,), method='fdr_bh')[1].reshape(asso_pairs.shape),
+                                index=asso_pairs.index,
+                                columns=asso_pairs.columns)

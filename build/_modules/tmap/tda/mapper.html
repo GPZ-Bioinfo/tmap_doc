@@ -1,0 +1,422 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tmap.tda.mapper &mdash; tmap 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tmap
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../basic.html">Basic Usage of <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param.html">How to Choose Parameters in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../vis.html">Visualizing and Exploring TDA Network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../statistical.html">Network Statistical Analysis in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how2work.html">How <em>tmap</em> work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example.html">Microbiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../FAQ.html">FAQ</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tmap</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tmap.tda.mapper</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tmap.tda.mapper</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">cluster</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+
+<div class="viewcode-block" id="Mapper"><a class="viewcode-back" href="../../../api.html#tmap.tda.mapper.Mapper">[docs]</a><span class="k">class</span> <span class="nc">Mapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    implement the TDA mapper framework for microbiome analysis</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1">#: if verbose greater than 1, it will output detail info.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+        <span class="c1"># self.lens = None</span>
+        <span class="c1"># self.clusterer = None</span>
+        <span class="c1"># self.cover = None</span>
+        <span class="c1"># self.graph = {}</span>
+
+<div class="viewcode-block" id="Mapper.filter"><a class="viewcode-back" href="../../../api.html#tmap.tda.mapper.Mapper.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">lens</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param numpy.ndarray/pandas.DataFrame data:</span>
+<span class="sd">        :param list lens: List of instance of class which is inherited from ``tmap.tda.filter.Filter``.</span>
+
+<span class="sd">        Input data may need to imputed for remove np.inf or np.nan, or it will raise error in fit step.</span>
+<span class="sd">        It is recommended to scale original data with MinMaxScalar to check the completeness of data.</span>
+
+<span class="sd">        Project/Filter high dimensional data points use the specified lens. If user provides multiple filters as input, it will</span>
+<span class="sd">        simply concatenate all output array along axis 1.</span>
+
+<span class="sd">        Finally, you will get a ndarray with *shape* (n_data,sum(n_components lens))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Data must not be None.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># &quot;Metric and Filters for projection/filtering&quot;</span>
+        <span class="c1"># projection of original data points onto a low dimensional space</span>
+        <span class="c1"># lens is a list of filters (tmap.tda.filter.Filters), can combine and use different filters</span>
+        <span class="c1"># if lens is None, data is assumed to be projected data already</span>
+        <span class="n">projected_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lens</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_filter</span> <span class="ow">in</span> <span class="n">lens</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filtering by </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_filter</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,))</span>
+                    <span class="k">if</span> <span class="n">_filter</span><span class="o">.</span><span class="n">metric</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;...calculate distance matrix using the </span><span class="si">%s</span><span class="s2"> metric.&quot;</span> <span class="o">%</span> <span class="n">_filter</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;...calculate distance matrix with default.&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">projected_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">projected_data</span> <span class="o">=</span> <span class="n">_filter</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="n">_filter</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="n">projected_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">projected_data</span><span class="p">,</span> <span class="n">p</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># lens is None, and the input &quot;data&quot; is assumed to be already filtered</span>
+            <span class="n">projected_data</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finish filtering of points cloud data.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">projected_data</span></div>
+
+<div class="viewcode-block" id="Mapper.map"><a class="viewcode-back" href="../../../api.html#tmap.tda.mapper.Mapper.map">[docs]</a>    <span class="k">def</span> <span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">cover</span><span class="p">,</span> <span class="n">clusterer</span><span class="o">=</span><span class="n">cluster</span><span class="o">.</span><span class="n">DBSCAN</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">min_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        map the points cloud with the projection data, and return a TDA graph.</span>
+
+<span class="sd">        :param numpy.ndarray/pandas.DataFrame data: The row number of data must equal to the data you passed to ``Cover``</span>
+<span class="sd">        :param tmap.tda.cover.Cover Cover:</span>
+<span class="sd">        :param sklearn.cluster clusterer:</span>
+<span class="sd">        :return: A dictionary with multiple keys which described below.</span>
+
+<span class="sd">        During the process, it will output progress information depending on ``verbose``</span>
+
+<span class="sd">        Basically, it will iterate all *hypercubes* which generated by ``cover`` and cluster samples within a *hypercubes* into several nodes with providing clusterer. It will drop unclassified samples out and keep samples which are clustered. The name of nodes are annotated by the counting number during iteration. Currently, it doesn&#39;t accept any name behaviour for nodes.</span>
+
+<span class="sd">        The resulting graph is a dictionary containing multiple keys and corresponding values. For better understanding the meaning of all keys and values. Here is the descriptions of each key.</span>
+
+<span class="sd">                1. nodes: Another dictionary for storge the mapping relationships between *nodes* and *samples*. Key is the name of nodes. Values is a list of corresponding index of samples.</span>
+<span class="sd">                2. edges: A list of 2-tuples for indicating edges between nodes.</span>
+<span class="sd">                3. adj_matrix: A square ``DataFrame`` constructed by nodes ID. The elements of the matrix indicate whether pairs of vertices are adjacent or not in the graph. (Unweighted)</span>
+<span class="sd">                4. sample_names: A list of samples names which assign from the index of providing ``data``. If &#39;index&#39; not in ``dir(data)``, it will replace with a range of n_row of data.</span>
+<span class="sd">                5. node_keys: A list of ordered nodes ID.</span>
+<span class="sd">                6. node_positions: A dictionary with node as key and position of node as value. Depending on the shape of the cover.data, it will simply calculate the average values of all samples within a node in cover.data and assign it as the position info of the node.</span>
+<span class="sd">                7. node_sizes: A dictionary with node as key and number of samples within the node as value.</span>
+<span class="sd">                8. params: A dictionary for storing parameters of ``cover`` and ``cluster``</span>
+
+<span class="sd">        In future, structured class of graph will be implemented and taken as the result of ``Mapper``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># nodes, edges and graph of the TDA graph</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">raw_nodes</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># projection data &amp; raw data should have a same number of points</span>
+        <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cover</span><span class="o">.</span><span class="n">n_points</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mapping on data </span><span class="si">%s</span><span class="s2"> using lens </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                  <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cover</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span>
+        <span class="c1"># Define covering of the projection data and minimal number of points in a hypercube to be cluster</span>
+        <span class="n">cluster_params</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+        <span class="n">min_cluster_samples</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;min_samples&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;...minimal number of points in hypercube to do clustering: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">min_cluster_samples</span><span class="p">,))</span>
+            <span class="c1"># print(&quot;...iterating &quot;)</span>
+        <span class="c1"># generate hypercubes from the cover and perform clustering analysis</span>
+        <span class="n">cubes</span> <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">hypercubes</span>
+        <span class="n">data_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">data_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">node_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">_iteration</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">cubes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_iteration</span> <span class="o">=</span> <span class="n">cubes</span>
+        <span class="k">if</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;precomputed&quot;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">data_vals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">data_vals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">cube</span> <span class="ow">in</span> <span class="n">_iteration</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">metric</span> <span class="o">!=</span> <span class="s2">&quot;precomputed&quot;</span><span class="p">:</span>
+                <span class="n">cube_data</span> <span class="o">=</span> <span class="n">data_vals</span><span class="p">[</span><span class="n">cube</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cube_data</span> <span class="o">=</span> <span class="n">data_vals</span><span class="p">[</span><span class="n">cube</span><span class="p">][:,</span> <span class="n">cube</span><span class="p">]</span>
+            <span class="n">cube_data_idx</span> <span class="o">=</span> <span class="n">data_idx</span><span class="p">[</span><span class="n">cube</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">cube_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_cluster_samples</span><span class="p">:</span>
+                <span class="c1"># storge raw node2samples relationship</span>
+                <span class="n">raw_point_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data_vals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+                <span class="n">raw_point_mask</span><span class="p">[</span><span class="n">cube_data_idx</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">clusterer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;fit&quot;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">clusterer</span><span class="p">)):</span>
+                    <span class="n">clusterer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">cube_data</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">clusterer</span><span class="o">.</span><span class="n">labels_</span><span class="p">):</span>
+                        <span class="c1"># the &quot;-1&quot; label is used for &quot;un-clustered&quot; points!!!</span>
+                        <span class="k">if</span> <span class="n">label</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                            <span class="n">point_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data_vals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+                            <span class="n">point_mask</span><span class="p">[</span><span class="n">cube_data_idx</span><span class="p">[</span><span class="n">clusterer</span><span class="o">.</span><span class="n">labels_</span> <span class="o">==</span> <span class="n">label</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">nodes</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">point_mask</span>
+                            <span class="n">raw_nodes</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_point_mask</span>
+                            <span class="n">node_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># assumed to have a whole cluster of cubes!!!</span>
+                    <span class="c1"># it equals to the raw node2samples</span>
+                    <span class="n">nodes</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_point_mask</span>
+                    <span class="n">node_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;...create </span><span class="si">%s</span><span class="s2"> nodes.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)))</span>
+        <span class="c1"># no cluster of nodes, and return None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">graph</span>
+
+        <span class="c1"># calculate properties of nodes: projection coordinates and size</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;...calculate projection coordinates of nodes.&quot;</span><span class="p">)</span>
+
+        <span class="n">node_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">node_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="n">cover</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">node_sizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">node_keys</span><span class="p">):</span>
+            <span class="n">data_in_node</span> <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="n">node_id</span><span class="p">],</span> <span class="p">:]</span>
+            <span class="n">node_coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">data_in_node</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">node_positions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">node_coordinates</span>
+            <span class="n">node_sizes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_in_node</span><span class="p">)</span>
+
+        <span class="c1"># construct the TDA graph from overlaps (common points) between nodes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;...construct a TDA graph.&quot;</span><span class="p">)</span>
+
+        <span class="n">node_ids</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="n">edges</span> <span class="o">=</span> <span class="p">[</span><span class="n">edge</span> <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">node_ids</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">&amp;</span> <span class="n">nodes</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]])]</span>
+        <span class="n">edges_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span><span class="s1">&#39;End&#39;</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">edges</span><span class="p">))</span>
+        <span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">edges_df</span><span class="o">.</span><span class="n">Source</span><span class="p">,</span><span class="n">edges_df</span><span class="o">.</span><span class="n">End</span><span class="p">)</span>
+        <span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">adj_matrix</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">node_ids</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="c1"># set the NaN value for filtering edges with pandas stack function</span>
+        <span class="c1"># adj_matrix = pd.DataFrame(data=np.nan, index=node_ids, columns=node_ids)</span>
+        <span class="c1"># # todo: this edges making step to be improved? using some native numpy?</span>
+        <span class="c1"># for k1, k2 in itertools.combinations(node_ids, 2):</span>
+        <span class="c1">#     if np.any(nodes[k1] &amp; nodes[k2]):</span>
+        <span class="c1">#         adj_matrix.loc[k1, k2] = 1</span>
+        <span class="c1">#         adj_matrix.loc[k2, k1] = 1</span>
+        <span class="c1">#</span>
+        <span class="c1"># edges = adj_matrix.stack(dropna=True)</span>
+        <span class="c1"># edges = edges.index.tolist()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;...create </span><span class="si">%s</span><span class="s2"> edges.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finish TDA mapping&quot;</span><span class="p">)</span>
+
+        <span class="c1"># transform the point mask into point ids in the nodes</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">node_id</span><span class="p">,</span> <span class="n">data_idx</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="n">node_id</span><span class="p">]])</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;edges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edges</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;adj_matrix&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adj_matrix</span>
+        <span class="k">if</span> <span class="s2">&quot;index&quot;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;sample_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;sample_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="c1"># ordered &quot;node_keys&quot;, mapped with &quot;node_positions&quot; and &quot;node_size&quot; (lists)</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_keys</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_positions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_positions</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_sizes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_sizes</span>
+        <span class="n">graph</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cluster&#39;</span><span class="p">:</span><span class="n">clusterer</span><span class="o">.</span><span class="n">get_params</span><span class="p">(),</span>
+                           <span class="s1">&#39;cover&#39;</span><span class="p">:{</span><span class="s1">&#39;resolution&#39;</span><span class="p">:</span><span class="n">cover</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+                                    <span class="s1">&#39;overlap&#39;</span><span class="p">:</span><span class="n">cover</span><span class="o">.</span><span class="n">overlap</span><span class="p">},</span>
+                           <span class="s1">&#39;_raw_nodes&#39;</span><span class="p">:</span><span class="n">raw_nodes</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">graph</span></div></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Tianhua Liao, YuChen Wei, Haokui Zhou.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/language_data.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
