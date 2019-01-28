@@ -194,25 +194,33 @@
         <span class="k">return</span> <span class="kc">False</span>
 
 
-<span class="k">def</span> <span class="nf">coenrichment_for_nodes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">fea</span><span class="p">,</span> <span class="n">enriched_centroid</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">safe_scores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="coenrichment_for_nodes"><a class="viewcode-back" href="../../../api.html#tmap.netx.coenrichment_analysis.coenrichment_for_nodes">[docs]</a><span class="k">def</span> <span class="nf">coenrichment_for_nodes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">fea</span><span class="p">,</span> <span class="n">enriched_centroid</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">safe_scores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coenrichment main function</span>
 <span class="sd">    With given feature and its enriched nodes, we could construct a contingency table when we comparing to other feature and its enriched nodes.</span>
 <span class="sd">    For statistical test association between different features, fisher-exact test was applied to each constructed contingency table. Fisher-exact test only consider the association between two classifications instead of the ratio. For coenrichment, we also implement a accessory function called ``is_enriched`` to further judge that if the ratio of enrichment is bigger than the non-enrichement.</span>
 
 <span class="sd">    Besides the global co-enrichment, several local enrichment were observed. With ``networkx`` algorithm for finding component, we could extract each local enrichment nodes from global enrichment.</span>
+
 <span class="sd">    Because of the complex combination between comparison of local enrichment, two different contingency table was constructed.</span>
 
 <span class="sd">    The contingency table which compare different enriched nodes among components and enriched or non-enriched nodes of other features shown below.</span>
 
-<span class="sd">                                        fea this comp enriched nodes, fea other comp enriched nodes</span>
-<span class="sd">                    o_f_enriched_nodes           s1                          s2</span>
-<span class="sd">                    o_f_non-enriched_nodes       s3                          s4</span>
+<span class="sd">    ======================== ================================= =================================</span>
+<span class="sd">    fea                      fea this comp enriched nodes      fea other comp enriched nodes</span>
+<span class="sd">    ======================== ================================= =================================</span>
+<span class="sd">    o_f_enriched_nodes       s1                                s2</span>
+<span class="sd">    o_f_non-enriched_nodes   s3                                s4</span>
+<span class="sd">    ======================== ================================= =================================</span>
 
 <span class="sd">    The other contingency table which compare enriched nodes within specific component or non-enriched nodes and enriched or non-enriched nodes of other features shown below.</span>
-<span class="sd">                                        fea this comp enriched nodes, fea non-enriched nodes</span>
-<span class="sd">                    o_f_enriched_nodes           s1                          s2</span>
-<span class="sd">                    o_f_non-enriched_nodes       s3                          s4</span>
+
+<span class="sd">    ======================== ================================= =================================</span>
+<span class="sd">    fea                      fea this comp enriched nodes      fea non-enriched nodes</span>
+<span class="sd">    ======================== ================================= =================================</span>
+<span class="sd">    o_f_enriched_nodes       s1                                s2</span>
+<span class="sd">    o_f_non-enriched_nodes   s3                                s4</span>
+<span class="sd">    ======================== ================================= =================================</span>
 
 <span class="sd">    For convenient calculation, three different mode [both|global|local] could be choose.</span>
 
@@ -312,7 +320,7 @@
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;global&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">sub_correlative_feas</span><span class="p">,</span> <span class="n">metainfo</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
 
 <span class="k">def</span> <span class="nf">batch_coenrichment</span><span class="p">(</span><span class="n">fea</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">safe_scores</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">p_value</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">_pre_cal_enriched</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

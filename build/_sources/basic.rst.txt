@@ -103,7 +103,7 @@ We built wrapper classes around `networkx` and `matplolib` to facilitate TDA net
     from tmap.tda.plot import show, Color
     y = iris.target
     color = Color(target=y, dtype="categorical")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.04)
+    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.14)
 
 .. image:: img/iris_basic_example1.png
     :alt: Iris tmap network

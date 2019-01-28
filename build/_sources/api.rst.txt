@@ -19,7 +19,11 @@ API
 
 .. autofunction:: tmap.netx.SAFE.SAFE_batch
 
+.. autofunction:: tmap.netx.SAFE._SAFE
+
 .. autofunction:: tmap.netx.coenrichment_analysis.pairwise_coenrichment
+
+.. autofunction:: tmap.netx.coenrichment_analysis.coenrichment_for_nodes
 
 .. autofunction:: tmap.tda.utils.output_graph
 

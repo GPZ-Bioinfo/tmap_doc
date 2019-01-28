@@ -4,9 +4,9 @@ Microbiome Examples
 The three published cohort data analysis pipelines was packaged into three ipython notebooks at github.
 You could access these by:
 
-1. `FGFP notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/FGFP/FGFP_pipelines.ipynb>`_
-2. `AGP notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/AGP/AGP_pipelines.ipynb>`_
-3. `EMP notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/EMP/EMP_pipelines.ipynb>`_
+1. `Flemish Gut Flora Project(FGFP) notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/FGFP/FGFP_pipelines.ipynb>`_ [Ref4]_
+2. `American Gut Project(AGP) notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/AGP/AGP_pipelines.ipynb>`_ [Ref7]_
+3. `Earth Microbiome Project(EMP) notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/EMP/EMP_pipelines.ipynb>`_ [Ref6]_
 4. `Simulation mixed type notebook <https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/Simulation/Simulate_mixed.ipynb>`_
 
 

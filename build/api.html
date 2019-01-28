@@ -488,6 +488,18 @@ and perform SAFE batch analysis for multiple features</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="tmap.netx.SAFE._SAFE">
+<code class="descclassname">tmap.netx.SAFE.</code><code class="descname">_SAFE</code><span class="sig-paren">(</span><em>graph</em>, <em>node_data</em>, <em>n_iter=1000</em>, <em>nr_threshold=0.5</em>, <em>all_dist=None</em>, <em>neighborhoods=None</em>, <em>_cal_type='dict'</em>, <em>_mode='enrich'</em>, <em>agg_mode='sum'</em>, <em>verbose=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tmap/netx/SAFE.html#_SAFE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tmap.netx.SAFE._SAFE" title="Permalink to this definition">¶</a></dt>
+<dd><p>perform SAFE analysis by node permutations
+:param graph:
+:param node_data: node associated values
+:param n_iter: number of permutations
+:param nr_threshold: Float in range of [0,100]. The threshold is used to cut path distance with percentiles for neighbour.
+:param _cal_type: hidden parameters. For a big data with too many features(&gt;=100), calculation with pandas will faster than using dict.
+:return: return dict with keys of nodes ID, values are normalized and multi-test corrected p values.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="tmap.netx.coenrichment_analysis.pairwise_coenrichment">
 <code class="descclassname">tmap.netx.coenrichment_analysis.</code><code class="descname">pairwise_coenrichment</code><span class="sig-paren">(</span><em>graph</em>, <em>safe_scores</em>, <em>n_iter=5000</em>, <em>p_value=0.05</em>, <em>_pre_cal_enriched=None</em>, <em>verbose=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tmap/netx/coenrichment_analysis.html#pairwise_coenrichment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tmap.netx.coenrichment_analysis.pairwise_coenrichment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pair-wise calculation for co-enrichment of each feature found at safe_scores.
@@ -504,6 +516,92 @@ Or you should modify n_iter and p_value to fit the params you passed to <code cl
 <li><strong>p_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The p-value to determine the enriched nodes.</li>
 <li><strong>_pre_cal_enriched</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – A pre calculated enriched_centroid which comprised all necessary features will save time.</li>
 <li><strong>verbose</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="tmap.netx.coenrichment_analysis.coenrichment_for_nodes">
+<code class="descclassname">tmap.netx.coenrichment_analysis.</code><code class="descname">coenrichment_for_nodes</code><span class="sig-paren">(</span><em>graph</em>, <em>nodes</em>, <em>fea</em>, <em>enriched_centroid</em>, <em>threshold=None</em>, <em>safe_scores=None</em>, <em>_filter=True</em>, <em>mode='both'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tmap/netx/coenrichment_analysis.html#coenrichment_for_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tmap.netx.coenrichment_analysis.coenrichment_for_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coenrichment main function
+With given feature and its enriched nodes, we could construct a contingency table when we comparing to other feature and its enriched nodes.
+For statistical test association between different features, fisher-exact test was applied to each constructed contingency table. Fisher-exact test only consider the association between two classifications instead of the ratio. For coenrichment, we also implement a accessory function called <code class="docutils literal notranslate"><span class="pre">is_enriched</span></code> to further judge that if the ratio of enrichment is bigger than the non-enrichement.</p>
+<p>Besides the global co-enrichment, several local enrichment were observed. With <code class="docutils literal notranslate"><span class="pre">networkx</span></code> algorithm for finding component, we could extract each local enrichment nodes from global enrichment.</p>
+<p>Because of the complex combination between comparison of local enrichment, two different contingency table was constructed.</p>
+<p>The contingency table which compare different enriched nodes among components and enriched or non-enriched nodes of other features shown below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="37%" />
+<col width="37%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">fea</th>
+<th class="head">fea this comp enriched nodes</th>
+<th class="head">fea other comp enriched nodes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>o_f_enriched_nodes</td>
+<td>s1</td>
+<td>s2</td>
+</tr>
+<tr class="row-odd"><td>o_f_non-enriched_nodes</td>
+<td>s3</td>
+<td>s4</td>
+</tr>
+</tbody>
+</table>
+<p>The other contingency table which compare enriched nodes within specific component or non-enriched nodes and enriched or non-enriched nodes of other features shown below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="37%" />
+<col width="37%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">fea</th>
+<th class="head">fea this comp enriched nodes</th>
+<th class="head">fea non-enriched nodes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>o_f_enriched_nodes</td>
+<td>s1</td>
+<td>s2</td>
+</tr>
+<tr class="row-odd"><td>o_f_non-enriched_nodes</td>
+<td>s3</td>
+<td>s4</td>
+</tr>
+</tbody>
+</table>
+<p>For convenient calculation, three different mode [both|global|local] could be choose.</p>
+<p>Output objects contain two different kinds of dictionary. One dict is recording the correlation information between different features, the other is recording the raw contingency table info between each comparsion which is a list of nodes representing s1,s2,s3,s4.</p>
+<p>If mode equals to ‘both’, it will output global correlative dict, local correlative, metainfo.
+If mode equals to ‘global’, it will output local correlative, metainfo.
+If mode equals to ‘local’, it will output global correlative dict, metainfo.</p>
+<p>For global correlative, keys are compared features and values are tuples (oddsratio, pvalue) from fisher-exact test.
+For local correlative, keys are tuples of (index of components, size of components, features) and values are as same as global correlative.
+The remaining metainfo is a dictionary shared same key to global/local correlative but contains contingency table info.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>graph</strong> – tmap constructed graph</li>
+<li><strong>nodes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – a list of nodes you want to process from specific feature</li>
+<li><strong>fea</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – feature name which doesn’t need to exist at enriched_centroid</li>
+<li><strong>enriched_centroid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – enriched_centroide output from <code class="docutils literal notranslate"><span class="pre">get_enriched_nodes</span></code></li>
+<li><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – None or a threshold for SAFE score. If it is a None, it will not filter the nodes.</li>
+<li><strong>safe_scores</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – A dictionary which store SAFE_scores for filter the nodes. If you want to filter the nodes, it must simultaneously give safe_scores and threshold.</li>
+<li><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – [both|global|local]</li>
 </ul>
 </td>
 </tr>

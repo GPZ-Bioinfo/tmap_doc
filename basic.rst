@@ -103,7 +103,7 @@ We built wrapper classes around `networkx` and `matplolib` to facilitate TDA net
     from tmap.tda.plot import show, Color
     y = iris.target
     color = Color(target=y, dtype="categorical")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.04)
+    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.14)
 
 .. image:: img/iris_basic_example1.png
     :alt: Iris tmap network
@@ -144,7 +144,7 @@ From the above figure, feature coloring shows that ``sepal length`` is strongly 
 .. code-block:: python
 
     from tmap.netx.SAFE import *
-    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000, nr_threshold=0.05)
+    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000)
     color = Color(target=safe_scores[X.columns[0]], dtype="numerical",target_by="node")
     show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.15)
 
@@ -155,7 +155,7 @@ From the above figure, feature coloring shows that ``sepal length`` is strongly 
 .. code-block:: python
 
     from tmap.netx.SAFE import *
-    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000, nr_threshold=0.05)
+    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000)
     color = Color(target=safe_scores[X.columns[0]], dtype="numerical",target_by="node")
     vis_progressX(graph,projected_X,simple=True,mode='file',color=color, dtype="numerical",filename='example2.html',auto_open=False)
 
