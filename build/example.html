@@ -1,0 +1,434 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Microbiome Examples &mdash; tmap 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API" href="api.html" />
+    <link rel="prev" title="How tmap work" href="how2work.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> tmap
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage of <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="param.html">How to Choose Parameters in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="vis.html">Visualizing and Exploring TDA Network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statistical.html">Network Statistical Analysis in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="how2work.html">How <em>tmap</em> work</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Microbiome Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#analyzing-the-population-scale-fgfp-microbiome-dataset">Analyzing the population-scale FGFP microbiome dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#driver-species-analysis">Driver species analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#identification-of-significant-host-covariates">Identification of significant host covariates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#microbiome-wide-association-of-fgfp-host-covariates">Microbiome-wide association of FGFP host covariates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analyzing-the-human-microbiome-from-a-daily-timescales-study">Analyzing the human microbiome from a daily timescales study</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tmap</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Microbiome Examples</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/example.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="microbiome-examples">
+<h1>Microbiome Examples<a class="headerlink" href="#microbiome-examples" title="Permalink to this headline">¶</a></h1>
+<p>The three published cohort data analysis pipelines was packaged into three ipython notebooks at github.
+You could access these by:</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/FGFP/FGFP_pipelines.ipynb">Flemish Gut Flora Project(FGFP) notebook</a> <a class="reference internal" href="reference.html#ref4" id="id1">[Ref4]</a></li>
+<li><a class="reference external" href="https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/AGP/AGP_pipelines.ipynb">American Gut Project(AGP) notebook</a> <a class="reference internal" href="reference.html#ref7" id="id2">[Ref7]</a></li>
+<li><a class="reference external" href="https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/EMP/EMP_pipelines.ipynb">Earth Microbiome Project(EMP) notebook</a> <a class="reference internal" href="reference.html#ref6" id="id3">[Ref6]</a></li>
+<li><a class="reference external" href="https://nbviewer.jupyter.org/github/GPZ-BIOINFO/tmap_notebook/blob/master/Simulation/Simulate_mixed.ipynb">Simulation mixed type notebook</a></li>
+</ol>
+<div class="section" id="analyzing-the-population-scale-fgfp-microbiome-dataset">
+<h2>Analyzing the population-scale FGFP microbiome dataset<a class="headerlink" href="#analyzing-the-population-scale-fgfp-microbiome-dataset" title="Permalink to this headline">¶</a></h2>
+<p>To demonstrate and validate the performance of <em>tmap</em>, we benchmarked the result from <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/27126039">‘Population-level analysis of gut microbiome variation’</a> (abbreviated as <strong>FGFP study</strong> below). <a class="reference internal" href="reference.html#ref4" id="id4">[Ref4]</a> <em>tmap</em> was applied to re-analyze the driver species of human gut microbiota, significant microbiome covariates from metadata and the interaction between driver genera and covariates.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">DBSCAN</span>
+<span class="kn">from</span> <span class="nn">tmap.tda</span> <span class="kn">import</span> <span class="n">mapper</span><span class="p">,</span> <span class="nb">filter</span>
+<span class="kn">from</span> <span class="nn">tmap.tda.cover</span> <span class="kn">import</span> <span class="n">Cover</span>
+<span class="kn">from</span> <span class="nn">tmap.tda.plot</span> <span class="kn">import</span> <span class="n">show</span><span class="p">,</span> <span class="n">Color</span>
+<span class="kn">from</span> <span class="nn">tmap.tda.metric</span> <span class="kn">import</span> <span class="n">Metric</span>
+<span class="kn">from</span> <span class="nn">tmap.tda.utils</span> <span class="kn">import</span> <span class="n">optimize_dbscan_eps</span><span class="p">,</span><span class="n">cover_ratio</span>
+<span class="kn">from</span> <span class="nn">tmap.netx.SAFE</span> <span class="kn">import</span> <span class="n">SAFE_batch</span><span class="p">,</span> <span class="n">get_SAFE_summary</span>
+<span class="kn">from</span> <span class="nn">tmap.test</span> <span class="kn">import</span> <span class="n">load_data</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># load taxa abundance data, sample metadata and precomputed distance matrix</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">load_data</span><span class="o">.</span><span class="n">FGFP_genus_profile</span><span class="p">()</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">load_data</span><span class="o">.</span><span class="n">FGFP_metadata</span><span class="p">()</span>
+<span class="n">dm</span> <span class="o">=</span> <span class="n">load_data</span><span class="o">.</span><span class="n">FGFP_BC_dist</span><span class="p">()</span>
+
+<span class="c1"># TDA Step1. initiate a Mapper</span>
+<span class="n">tm</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="n">Mapper</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># TDA Step2. Projection</span>
+<span class="n">metric</span> <span class="o">=</span> <span class="n">Metric</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">&quot;precomputed&quot;</span><span class="p">)</span>
+<span class="n">lens</span> <span class="o">=</span> <span class="p">[</span><span class="nb">filter</span><span class="o">.</span><span class="n">MDS</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span><span class="n">random_state</span><span class="o">=</span><span class="mi">100</span><span class="p">)]</span>
+<span class="n">projected_X</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">dm</span><span class="p">,</span> <span class="n">lens</span><span class="o">=</span><span class="n">lens</span><span class="p">)</span>
+
+<span class="c1"># Step4. Covering, clustering &amp; mapping</span>
+<span class="n">eps</span> <span class="o">=</span> <span class="n">optimize_dbscan_eps</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">DBSCAN</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">min_samples</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">cover</span> <span class="o">=</span> <span class="n">Cover</span><span class="p">(</span><span class="n">projected_data</span><span class="o">=</span><span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">projected_X</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">cover</span><span class="o">=</span><span class="n">cover</span><span class="p">,</span> <span class="n">clusterer</span><span class="o">=</span><span class="n">clusterer</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Graph covers </span><span class="si">%.2f</span><span class="s1"> percentage of samples.&#39;</span> <span class="o">%</span> <span class="n">cover_ratio</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span><span class="n">X</span><span class="p">))</span>
+<span class="n">n_iter</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">safe_scores</span> <span class="o">=</span> <span class="n">SAFE_batch</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">meta_data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="driver-species-analysis">
+<h2>Driver species analysis<a class="headerlink" href="#driver-species-analysis" title="Permalink to this headline">¶</a></h2>
+<p>In FGFP study, driver genus was identified by the contribution of each genus to microbiome variation via Canonical correspondence analysis (<strong>CCA</strong>) using both raw and normalized genus abundance. In our re-analysis, we identified driver genus by ranking the importance of a genus by its SAFE enrichment score with <em>tmap</em>. This approach successfully recovered all the top-10 driver genera reported in the FGFP study.</p>
+<p>Additionally, <em>tmap</em> also identified top-ranking driver genera that were not reported among the top-10 driver genera in the FGFP study, including <em>unclassified_Veillonellaceae, unclassified_Clostridiaceae and Sporobacter</em>. As in the following figure of <em>tmap</em> network visualization, these genera (such as <em>Sporobacter</em>) show enrichments in multiple dispersed parts of the network, rather than a single enriched component, which presents a ‘non-linear’ pattern that may be hard to detect in CCA.</p>
+<img alt="FGFP Sporobacter" src="_images/FGFP_fig1.png" />
+</div>
+<div class="section" id="identification-of-significant-host-covariates">
+<h2>Identification of significant host covariates<a class="headerlink" href="#identification-of-significant-host-covariates" title="Permalink to this headline">¶</a></h2>
+<p>The FGFP study identified host covariates of microbiome variation by calculating the association between host factors and genus-level community ordination with the <em>envfit</em> function in the <em>vegan</em> R package. The <em>envfit</em> function preforms <em>MANOVA</em> and linear correlation for categorical and continuous variables, respectively. In total, 69 out of 503 host factors were identified as covariates of gut microbiome using FDR&lt;0.1, and 43 among them were considered as significant covariates when using FDR&lt;0.05 as a cut-off.</p>
+<p>Since <em>tmap</em> was robust to identify both linear and non-linear associations, 67 out of 503 host factors were identified as significant covariates with FDR&lt;0.05. Compared to the original FGFP study, <em>tmap</em> successfully identified 41 out of the 43 formerly detected covariates, and also identified 26 new covariates.</p>
+<p>The two covariates reported as significant in the FGFP study but not identified by <em>tmap</em> are <em>G03DA04_progesterone</em> and <em>Gamma-glutamyltransferase</em>. As shown in the following figures, it can be found that, <em>G03DA04_progesterone</em> was observed only in a small group of samples, and is not significant (SAFE score &lt; 0.67) after SAFE transformation due to the small sample size.</p>
+<img alt="FGFP G03DA04_progesterone" src="_images/FGFP_fig2.png" />
+<p>In contrast, <em>Gamma-glutamyltransferase</em> was observed in most of the samples as in the following figure. But the network landscape (SAFE scores) of this factor did not show significant patterns of enrichment (SAFE score &lt; 0.67).</p>
+<img alt="FGFP Gamma-glutamyltransferase" src="_images/FGFP_fig3.png" />
+</div>
+<div class="section" id="microbiome-wide-association-of-fgfp-host-covariates">
+<h2>Microbiome-wide association of FGFP host covariates<a class="headerlink" href="#microbiome-wide-association-of-fgfp-host-covariates" title="Permalink to this headline">¶</a></h2>
+<p>In FGFP study, <em>the boosted additive generalized linear model</em> was performed to analyze association between host covariates and driver species, with a 5% significance level (after adjustment for multiple comparison). However, this approach reported small effect sizes for covariates to explain the variation of genus abundance (correlation coefficient from 0.015 to 0.147).</p>
+<p>As an alternative, <em>tmap</em> uses the network-based SAFE scores for association analysis, rather than the original feature values. And association is performed based on aggregated values on nodes (groups of samples), instead of original feature values on samples. Pairwise Pearson correlation was calculated with a FDR&lt;5% significance level. Compared with results of the FGFP study, this approach reported improved effect sizes of host covariates (correlation coefficient from 0.115 to 0.728). For example, the association between <em>concentration of serum Hemoglobin</em> and abundance of <em>Roseburia</em>, detected to be significantly associated by both approaches, the coefficient was improved from 0.12 to 0.72 by using <em>tmap</em>.</p>
+<p>Additionally, new associations were also identified by <em>tmap</em>. For example, the association between usage of <em>A06AD15_65_.osmotic_laxatives</em> and abundance of <em>Aeromonas</em> was found, as demonstrated in the following figure.</p>
+<img alt="FGFP MWAS" src="_images/FGFP_fig4.png" />
+</div>
+<div class="section" id="analyzing-the-human-microbiome-from-a-daily-timescales-study">
+<h2>Analyzing the human microbiome from a daily timescales study<a class="headerlink" href="#analyzing-the-human-microbiome-from-a-daily-timescales-study" title="Permalink to this headline">¶</a></h2>
+<p><em>tmap</em> can be used in time-series study of human microbiome, such as the daily timescales study by <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/25146375">David et al.</a>. This study collected daily fecal and salivary samples from two individuals to analyze how lifestyle affects the dynamics of human microbiota. With <em>tmap</em>, we can visualize how timescales are mapped to the landscape of microbiome of a subject to discover hidden patterns in personal microbiome dynamics. <a class="reference internal" href="reference.html#ref5" id="id5">[Ref5]</a></p>
+<p>More details about the codes used in this analysis can be found at <code class="docutils literal notranslate"><span class="pre">test/test_Daily_saliva.py</span></code> and <code class="docutils literal notranslate"><span class="pre">test/test_Daily_stool.py</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">DBSCAN</span>
+<span class="kn">from</span> <span class="nn">tmap.tda</span> <span class="kn">import</span> <span class="n">mapper</span><span class="p">,</span> <span class="nb">filter</span>
+<span class="kn">from</span> <span class="nn">tmap.tda.cover</span> <span class="kn">import</span> <span class="n">Cover</span>
+<span class="kn">from</span> <span class="nn">tmap.tda.plot</span> <span class="kn">import</span> <span class="n">show</span><span class="p">,</span> <span class="n">Color</span>
+<span class="kn">from</span> <span class="nn">tmap.tda.metric</span> <span class="kn">import</span> <span class="n">Metric</span>
+<span class="kn">from</span> <span class="nn">tmap.tda.utils</span> <span class="kn">import</span> <span class="n">optimize_dbscan_eps</span><span class="p">,</span><span class="n">cover_ratio</span>
+<span class="kn">from</span> <span class="nn">tmap.netx.SAFE</span> <span class="kn">import</span> <span class="n">SAFE_batch</span><span class="p">,</span> <span class="n">get_SAFE_summary</span><span class="p">,</span><span class="n">SAFE_single</span>
+<span class="kn">from</span> <span class="nn">tmap.test</span> <span class="kn">import</span> <span class="n">load_data</span>
+<span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">import</span> <span class="n">title</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">pdist</span><span class="p">,</span><span class="n">squareform</span>
+
+<span class="c1"># load taxa abundance data, sample metadata and precomputed distance matrix</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">load_data</span><span class="o">.</span><span class="n">Daily_genus_profile</span><span class="p">(</span><span class="s2">&quot;stool&quot;</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;Stool69&quot;</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="c1"># Stool69 is missing at provided metadata. So deleted it</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">load_data</span><span class="o">.</span><span class="n">Daily_metadata_ready</span><span class="p">()</span>
+<span class="n">dm</span> <span class="o">=</span> <span class="n">squareform</span><span class="p">(</span><span class="n">pdist</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">metric</span><span class="o">=</span><span class="s2">&quot;braycurtis&quot;</span><span class="p">))</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,:]</span>
+
+<span class="c1"># TDA Step1. initiate a Mapper</span>
+<span class="n">tm</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="n">Mapper</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># TDA Step2. Projection</span>
+<span class="n">metric</span> <span class="o">=</span> <span class="n">Metric</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">&quot;precomputed&quot;</span><span class="p">)</span>
+<span class="n">lens</span> <span class="o">=</span> <span class="p">[</span><span class="nb">filter</span><span class="o">.</span><span class="n">MDS</span><span class="p">(</span><span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span><span class="n">random_state</span><span class="o">=</span><span class="mi">100</span><span class="p">)]</span>
+<span class="n">projected_X</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">dm</span><span class="p">,</span> <span class="n">lens</span><span class="o">=</span><span class="n">lens</span><span class="p">)</span>
+
+<span class="c1"># Step4. Covering, clustering &amp; mapping</span>
+<span class="n">eps</span> <span class="o">=</span> <span class="n">optimize_dbscan_eps</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">99</span><span class="p">)</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">DBSCAN</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">min_samples</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">cover</span> <span class="o">=</span> <span class="n">Cover</span><span class="p">(</span><span class="n">projected_data</span><span class="o">=</span><span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">projected_X</span><span class="p">),</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.85</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">cover</span><span class="o">=</span><span class="n">cover</span><span class="p">,</span> <span class="n">clusterer</span><span class="o">=</span><span class="n">clusterer</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Graph covers </span><span class="si">%.2f</span><span class="s1"> percentage of samples.&#39;</span> <span class="o">%</span> <span class="n">cover_ratio</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span><span class="n">X</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Filtering</span> <span class="n">by</span> <span class="n">MDS</span><span class="o">.</span>
+<span class="o">...</span><span class="n">calculate</span> <span class="n">distance</span> <span class="n">matrix</span> <span class="n">using</span> <span class="n">the</span> <span class="n">precomputed</span> <span class="n">metric</span><span class="o">.</span>
+<span class="n">Finish</span> <span class="n">filtering</span> <span class="n">of</span> <span class="n">points</span> <span class="n">cloud</span> <span class="n">data</span><span class="o">.</span>
+<span class="n">Mapping</span> <span class="n">on</span> <span class="n">data</span> <span class="p">(</span><span class="mi">501</span><span class="p">,</span> <span class="mi">98</span><span class="p">)</span> <span class="n">using</span> <span class="n">lens</span> <span class="p">(</span><span class="mi">501</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="o">...</span><span class="n">minimal</span> <span class="n">number</span> <span class="n">of</span> <span class="n">points</span> <span class="ow">in</span> <span class="n">hypercube</span> <span class="n">to</span> <span class="n">do</span> <span class="n">clustering</span><span class="p">:</span> <span class="mi">3</span>
+<span class="o">...</span><span class="n">create</span> <span class="mi">474</span> <span class="n">nodes</span><span class="o">.</span>
+<span class="o">...</span><span class="n">calculate</span> <span class="n">projection</span> <span class="n">coordinates</span> <span class="n">of</span> <span class="n">nodes</span><span class="o">.</span>
+<span class="o">...</span><span class="n">construct</span> <span class="n">a</span> <span class="n">TDA</span> <span class="n">graph</span><span class="o">.</span>
+<span class="o">...</span><span class="n">create</span> <span class="mi">3313</span> <span class="n">edges</span><span class="o">.</span>
+<span class="n">Finish</span> <span class="n">TDA</span> <span class="n">mapping</span>
+<span class="n">Graph</span> <span class="n">covers</span> <span class="mf">91.22</span> <span class="n">percentage</span> <span class="n">of</span> <span class="n">samples</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>First, we take the metadata of <code class="docutils literal notranslate"><span class="pre">COLLECTION_DAY</span></code> as our target variable to be mapped to the microbiome TDA network.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">target_feature</span> <span class="o">=</span> <span class="s1">&#39;COLLECTION_DAY&#39;</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">target_feature</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span> <span class="n">target_by</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">node_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;spring&#39;</span><span class="p">,</span> <span class="n">strength</span><span class="o">=</span><span class="mf">0.13</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The following figure shows how the fecal microbiome changes with the <code class="docutils literal notranslate"><span class="pre">COLLECTION_DAY</span></code> for the two studied subjects.</p>
+<img alt="Daily microbiome COLLECTION_DAY" src="_images/Daily_Stool_collection_day.png" />
+<p>Next, we can map <code class="docutils literal notranslate"><span class="pre">HOST_SUBJECT_ID</span></code> to the TDA network to show inter-individual differences. In the following codes, the <code class="docutils literal notranslate"><span class="pre">categorical</span></code> type is used to show dominant <code class="docutils literal notranslate"><span class="pre">subject</span> <span class="pre">ID</span></code> for a node, which is a group of samples, and may contain different subjects. Or we can use a <code class="docutils literal notranslate"><span class="pre">numerical</span></code> type to show mean values of the target variable for each node.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">target_feature</span> <span class="o">=</span> <span class="s1">&#39;HOST_SUBJECT_ID&#39;</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">target_feature</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="n">target_by</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">node_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;spring&#39;</span><span class="p">,</span> <span class="n">strength</span><span class="o">=</span><span class="mf">0.13</span><span class="p">)</span>
+
+<span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">target_feature</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span> <span class="n">target_by</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">node_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;spring&#39;</span><span class="p">,</span> <span class="n">strength</span><span class="o">=</span><span class="mf">0.13</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="Daily microbiome HOST_SUBJECT_ID" src="_images/Daily_host_compare.png" />
+<p>The main focus of the original study is to associate changes in microbiome with changes in lifestyle. In the study, Subject A left the USA on day 70 and returned on day 122. He suffered from diarrheal illnesses from day 80 to day 85, and from day 104 to day 113. Subject B suffered from a enteric infection from days 151 to 159.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">time_range</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="p">):</span>
+    <span class="n">target_vals</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_</span><span class="p">,</span><span class="s2">&quot;HOST_SUBJECT_ID&quot;</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;2202:Donor</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sample</span> <span class="ow">and</span> <span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_</span><span class="p">,</span><span class="s2">&quot;COLLECTION_DAY&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">target_vals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span> <span class="n">target_by</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">)</span>
+    <span class="n">show</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">node_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;spring&#39;</span><span class="p">,</span> <span class="n">strength</span><span class="o">=</span><span class="mf">0.03</span><span class="p">)</span>
+    <span class="c1">#title(&quot;Subject %s at day %s to %s&quot; % (sample,start,end))</span>
+<span class="c1"># Travel period</span>
+<span class="n">time_range</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="mi">70</span><span class="p">,</span><span class="mi">123</span><span class="p">)</span>
+<span class="c1"># First diarrheal illness</span>
+<span class="n">time_range</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="mi">80</span><span class="p">,</span><span class="mi">85</span><span class="p">)</span>
+<span class="c1"># Second diarrheal illness</span>
+<span class="n">time_range</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="mi">104</span><span class="p">,</span><span class="mi">113</span><span class="p">)</span>
+
+<span class="c1"># Pre-travel period</span>
+<span class="n">time_range</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">69</span><span class="p">)</span>
+<span class="c1"># Travel period</span>
+<span class="n">time_range</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="mi">70</span><span class="p">,</span><span class="mi">122</span><span class="p">)</span>
+<span class="c1"># Post-travel period</span>
+<span class="n">time_range</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="mi">123</span><span class="p">,</span><span class="mi">153</span><span class="p">)</span>
+
+<span class="c1"># Pre-enteric infection period</span>
+<span class="n">time_range</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span><span class="mi">121</span><span class="p">,</span><span class="mi">150</span><span class="p">)</span>
+<span class="c1"># enteric infection period</span>
+<span class="n">time_range</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span><span class="mi">151</span><span class="p">,</span><span class="mi">159</span><span class="p">)</span>
+<span class="c1"># Post-enteric infection period</span>
+<span class="n">time_range</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span><span class="mi">160</span><span class="p">,</span><span class="mi">197</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="Daily_Stool_A_diarrheal" src="_images/Daily_Stool_A_diarrheal.png" />
+<img alt="Subject_A_perturbation" src="_images/Subject_A_perturbation.png" />
+<img alt="Subject_B_enteric_infection" src="_images/Subject_B_enteric_infection.png" />
+<p>From the above figures, we could found that there are several changes in the microbiome of subject A between day 70 and day 122. It is worth noting that, the fecal microbiome samples of diarrheal illnesses at different time points are adjacent to each other in the network, and are overlap with shared nodes.  <strong>Subject A’s travel-related microbiota shift</strong> concluded in the original paper can be confirmed in this <em>tmap</em> re-analysis of the microbiome dataset. From the above figure, subject B’s microbiome before and after the enteric infection is distinct, which is also consistent with the results of the original study.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="how2work.html" class="btn btn-neutral" title="How tmap work" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Tianhua Liao, YuChen Wei, Haokui Zhou.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

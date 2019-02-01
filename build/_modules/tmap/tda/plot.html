@@ -1,0 +1,990 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tmap.tda.plot &mdash; tmap 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tmap
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../basic.html">Basic Usage of <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../param.html">How to Choose Parameters in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../vis.html">Visualizing and Exploring TDA Network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../statistical.html">Network Statistical Analysis in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how2work.html">How <em>tmap</em> work</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../example.html">Microbiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../FAQ.html">FAQ</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tmap</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tmap.tda.plot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tmap.tda.plot</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">colorsys</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
+<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">mcolors</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">plotly</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objs</span> <span class="k">as</span> <span class="nn">go</span>
+<span class="kn">from</span> <span class="nn">plotly</span> <span class="k">import</span> <span class="n">tools</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">decomposition</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">LabelEncoder</span><span class="p">,</span> <span class="n">MinMaxScaler</span><span class="p">,</span> <span class="n">maxabs_scale</span>
+
+<span class="kn">from</span> <span class="nn">tmap.netx.SAFE</span> <span class="k">import</span> <span class="n">construct_node_data</span>
+<span class="kn">from</span> <span class="nn">tmap.netx.SAFE</span> <span class="k">import</span> <span class="n">get_enriched_nodes</span>
+
+
+<div class="viewcode-block" id="Color"><a class="viewcode-back" href="../../../api.html#tmap.tda.plot.Color">[docs]</a><span class="k">class</span> <span class="nc">Color</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    map colors to target values for TDA network visualization</span>
+
+<span class="sd">    * If ``target_by`` set as *samples*, it means that it will pass original data instead of SAFE score for colorizing the node on the graph.</span>
+<span class="sd">    * If ``node`` set as *node*, it means that it will pass SAFE score for colorizing the node on the graph. So the target must be a dictionary generated by SAFE_batch function. If you using single SAFE function called ``SAFE``, it will also create a dict which could be used.</span>
+
+<span class="sd">    The basically code assign the highest values with red and the lowest values with blue. Before we assign the color, it will split the target into 4 parts with ``np.percentile`` and scale each part with different upper and lower boundary.</span>
+
+<span class="sd">    It is normally have 4 distinct parts in color bar but it will easily missing some parts due to some skewness which misleading the values of percentile.</span>
+
+<span class="sd">    :param list/np.ndarray/pd.Series/dict target: target values for samples or nodes</span>
+<span class="sd">    :param str dtype: type of target values, &quot;numerical&quot; or &quot;categorical&quot;</span>
+<span class="sd">    :param str target_by: target type of &quot;sample&quot; or &quot;node&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span> <span class="n">target_by</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param list/np.ndarray/pd.Series target: target values for samples or nodes</span>
+<span class="sd">        :param str dtype: type of target values, &quot;numerical&quot; or &quot;categorical&quot;</span>
+<span class="sd">        :param str target_by: target type of &quot;sample&quot; or &quot;node&quot;</span>
+<span class="sd">        (for node target values, accept a node associated dictionary of values)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;target must not be None.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># for node target values, accept a node associated dictionary of values</span>
+        <span class="k">if</span> <span class="n">target_by</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span>
+            <span class="n">_target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">_node_idx</span><span class="p">,</span> <span class="n">_node_val</span> <span class="ow">in</span> <span class="n">target</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">_target</span><span class="p">[</span><span class="n">_node_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">_node_val</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">_target</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span> <span class="s2">&quot;categorical&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;data type must be &#39;numerical&#39; or &#39;categorical&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target_by</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span> <span class="s2">&quot;node&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;target values must be by &#39;sample&#39; or &#39;node&#39;&quot;</span><span class="p">)</span>
+        <span class="c1"># target values should be numbers, check and encode categorical labels</span>
+
+        <span class="k">if</span> <span class="p">((</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">float</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">))</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;categorical&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_by</span> <span class="o">=</span> <span class="n">target_by</span>
+
+    <span class="k">def</span> <span class="nf">_get_hex_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        map a normalize i value to HSV colors</span>
+<span class="sd">        :param i: input for the hue value, normalized to [0, 1.0]</span>
+<span class="sd">        :return: a hex color code for i</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># H values: from 0 (red) to 240 (blue), using the HSV color systems for color mapping</span>
+        <span class="c1"># largest value of 1 mapped to red, and smallest of 0 mapped to blue</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">colorsys</span><span class="o">.</span><span class="n">hsv_to_rgb</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="mi">240</span> <span class="o">/</span> <span class="mi">360</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;#</span><span class="si">%02x%02x%02x</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">255</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">255</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">255</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_rescale_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        scale target values according to density/percentile</span>
+<span class="sd">        to make colors distributing evenly among values</span>
+<span class="sd">        :param target: numerical target values</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rescaled_target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">scaler_min_q1</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))</span>
+        <span class="n">scaler_q1_median</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+        <span class="n">scaler_median_q3</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">))</span>
+        <span class="n">scaler_q3_max</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">q1</span><span class="p">,</span> <span class="n">median</span><span class="p">,</span> <span class="n">q3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="mi">75</span><span class="p">)</span>
+
+        <span class="n">index_min_q1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">target</span> <span class="o">&lt;=</span> <span class="n">q1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">index_q1_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(((</span><span class="n">target</span> <span class="o">&gt;=</span> <span class="n">q1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">target</span> <span class="o">&lt;=</span> <span class="n">median</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">index_median_q3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(((</span><span class="n">target</span> <span class="o">&gt;=</span> <span class="n">median</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">target</span> <span class="o">&lt;=</span> <span class="n">q3</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">index_q3_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">target</span> <span class="o">&gt;=</span> <span class="n">q3</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">target_min_q1</span> <span class="o">=</span> <span class="n">scaler_min_q1</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="n">index_min_q1</span><span class="p">])</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">index_min_q1</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="n">index_min_q1</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">target_q1_median</span> <span class="o">=</span> <span class="n">scaler_q1_median</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="n">index_q1_median</span><span class="p">])</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">index_q1_median</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="n">index_q1_median</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">target_median_q3</span> <span class="o">=</span> <span class="n">scaler_median_q3</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="n">index_median_q3</span><span class="p">])</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">index_median_q3</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="n">index_median_q3</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">target_q3_max</span> <span class="o">=</span> <span class="n">scaler_q3_max</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="n">index_q3_max</span><span class="p">])</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">index_q3_max</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="n">index_q3_max</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="c1"># in case the situation which will raise ValueError when sliced_index is all False.</span>
+
+        <span class="c1"># using percentile to cut and assign colors will meet some special case which own weak distribution.</span>
+        <span class="c1"># below `if` statement is trying to determine and solve these situations.</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">target_q3_max</span> <span class="o">==</span> <span class="mf">0.75</span><span class="p">):</span>
+            <span class="c1"># all transformed q3 number equal to the biggest values 0.75.</span>
+            <span class="c1"># if we didn&#39;t solve it, red color which representing biggest value will disappear.</span>
+            <span class="c1"># solution: make it all into 1.</span>
+            <span class="n">target_q3_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">target_q3_max</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">q1</span> <span class="o">==</span> <span class="n">median</span> <span class="o">==</span> <span class="n">q3</span><span class="p">:</span>
+            <span class="c1"># if the border of q1,median,q3 area are all same, it means the the distribution is extremely positive skewness.</span>
+            <span class="c1"># Blue color which represents smallest value will disappear.</span>
+            <span class="c1"># Solution: Make the range of transformed value output from the final quantile into 0-1.</span>
+            <span class="n">target_q3_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">_</span> <span class="k">if</span> <span class="n">_</span> <span class="o">!=</span> <span class="mf">0.75</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">target_q3_max</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">target_q3_max</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">rescaled_target</span><span class="p">[</span><span class="n">index_median_q3</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_median_q3</span>
+        <span class="n">rescaled_target</span><span class="p">[</span><span class="n">index_q1_median</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_q1_median</span>
+        <span class="n">rescaled_target</span><span class="p">[</span><span class="n">index_min_q1</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_min_q1</span>
+        <span class="n">rescaled_target</span><span class="p">[</span><span class="n">index_q3_max</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_q3_max</span>
+
+        <span class="k">return</span> <span class="n">rescaled_target</span>
+
+<div class="viewcode-block" id="Color.get_colors"><a class="viewcode-back" href="../../../api.html#tmap.tda.plot.Color.get_colors">[docs]</a>    <span class="k">def</span> <span class="nf">get_colors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param dict nodes: nodes from graph</span>
+<span class="sd">        :param cmap: not implemented yet...</span>
+<span class="sd">        :return: nodes colors with keys, and the color map of the target values</span>
+<span class="sd">        :rtype: tuple (first is a dict node_ID:node_color, second is a tuple (node_ID_index,node_color))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># todo: accept a customzied color map [via the &#39;cmap&#39; parameter]</span>
+        <span class="n">node_keys</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="c1"># map a color for each node</span>
+        <span class="n">node_color_target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">node_keys</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_by</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span>
+                <span class="n">target_in_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">target_in_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="n">node_id</span><span class="p">]]</span>
+
+            <span class="c1"># summarize target values from samples/nodes for each node</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;categorical&quot;</span><span class="p">:</span>
+                <span class="c1"># Return an array of the modal (most common) value in the passed array. (if more than one, the smallest is return)</span>
+                <span class="n">node_color_target</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="n">target_in_node</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;numerical&quot;</span><span class="p">:</span>
+                <span class="n">node_color_target</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">target_in_node</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">node_color_target</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nan was found in the given target, Please check the input data.&quot;</span><span class="p">)</span>
+        <span class="n">_node_color_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rescale_target</span><span class="p">(</span><span class="n">node_color_target</span><span class="p">)</span>
+        <span class="n">node_colors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_hex_color</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">_node_color_idx</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">node_keys</span><span class="p">,</span> <span class="n">node_colors</span><span class="p">)),</span> <span class="p">(</span><span class="n">node_color_target</span><span class="p">,</span> <span class="n">node_colors</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Color.get_sample_colors"><a class="viewcode-back" href="../../../api.html#tmap.tda.plot.Color.get_sample_colors">[docs]</a>    <span class="k">def</span> <span class="nf">get_sample_colors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param dict nodes: nodes from graph</span>
+<span class="sd">        :param cmap: not implemented yet...</span>
+<span class="sd">        :return: nodes colors with keys, and the color map of the target values</span>
+<span class="sd">        :rtype: tuple (first is a dict node_ID:node_color, second is a tuple (node_ID_index,node_color))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cat2colors</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_by</span> <span class="o">==</span> <span class="s2">&quot;node&quot;</span><span class="p">:</span>
+            <span class="n">sample_colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;red&#39;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;numerical&quot;</span><span class="p">:</span>
+                <span class="n">_sample_color_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rescale_target</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+                <span class="n">sample_colors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_hex_color</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">_sample_color_idx</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+                <span class="n">_sample_color_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># add 1 into idx, so it is 1.1 which is little bigger than 1.</span>
+                <span class="n">target2idx</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">)),</span> <span class="n">_sample_color_idx</span><span class="p">))</span>
+                <span class="n">sample_colors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_hex_color</span><span class="p">(</span><span class="n">target2idx</span><span class="p">[</span><span class="n">label</span><span class="p">])</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+                <span class="n">cat2colors</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">sample_colors</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+                <span class="n">sample_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">cmap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+                <span class="c1"># todo: implement for custom cmap for categorical values.</span>
+
+        <span class="k">return</span> <span class="n">sample_colors</span><span class="p">,</span> <span class="n">cat2colors</span></div></div>
+
+
+<div class="viewcode-block" id="show"><a class="viewcode-back" href="../../../api.html#tmap.tda.plot.show">[docs]</a><span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">node_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">edge_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strength</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Network visualization of TDA mapper</span>
+
+<span class="sd">    Using matplotlib as basic engine, it is easily add title or others elements.</span>
+
+<span class="sd">    :param np.ndarray/pd.DataFrame data:</span>
+<span class="sd">    :param dict graph:</span>
+<span class="sd">    :param Color/str color: Passing ``tmap.tda.plot.Color`` or just simply color string.</span>
+<span class="sd">    :param tuple fig_size: height and width</span>
+<span class="sd">    :param int node_size: With given node_size, it will scale all nodes with same size ``node_size/max(node_sizes) * node_size **2``. The size of nodes also depends on the biggest node which contains maxium number of samples.</span>
+<span class="sd">    :param int edge_width: Line width of edges.</span>
+<span class="sd">    :param str/None mode: Currently, Spring layout is the only one style supported.</span>
+<span class="sd">    :param float strength: Optimal distance between nodes.  If None the distance is set to ``1/sqrt(n)`` where n is the number of nodes.  Increase this value to move nodes farther apart.</span>
+<span class="sd">    :return: plt.figure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># todo: add file path for graph saving</span>
+    <span class="n">node_keys</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_keys&quot;</span><span class="p">]</span>
+    <span class="n">node_positions</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_positions&quot;</span><span class="p">]</span>
+    <span class="n">node_sizes</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_sizes&quot;</span><span class="p">]</span>
+
+    <span class="c1"># scale node sizes</span>
+    <span class="n">max_node_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">node_sizes</span><span class="p">)</span>
+    <span class="n">sizes</span> <span class="o">=</span> <span class="p">(</span><span class="n">node_sizes</span> <span class="o">/</span> <span class="n">max_node_size</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">node_size</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># map node colors</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span>
+        <span class="n">color_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">node_id</span><span class="p">:</span> <span class="n">color</span> <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">node_keys</span><span class="p">}</span>
+        <span class="n">target2colors</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">node_keys</span><span class="p">),</span> <span class="mi">1</span><span class="p">)),</span> <span class="p">[</span><span class="n">color</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_keys</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">color_map</span><span class="p">,</span> <span class="n">target2colors</span> <span class="o">=</span> <span class="n">color</span><span class="o">.</span><span class="n">get_colors</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="s2">&quot;nodes&quot;</span><span class="p">])</span>
+    <span class="n">colorlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">color_map</span><span class="p">[</span><span class="n">it</span><span class="p">]</span> <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">node_keys</span><span class="p">]</span>
+
+    <span class="n">node_target_values</span><span class="p">,</span> <span class="n">node_colors</span> <span class="o">=</span> <span class="n">target2colors</span>
+    <span class="n">legend_lookup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">node_target_values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">),</span> <span class="n">node_colors</span><span class="p">))</span>
+
+    <span class="c1"># if there are indicated color with ``Color``, it need to add some legend for given color.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">Color</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">color</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;categorical&quot;</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">fig_size</span><span class="p">)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">color</span><span class="o">.</span><span class="n">label_encoder</span><span class="p">:</span>
+                <span class="n">encoded_cat</span> <span class="o">=</span> <span class="n">color</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">color</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+                <span class="c1"># if color.label_encoder exist, color.labels must be some kinds of string list which is need to encoded.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">encoded_cat</span> <span class="o">=</span> <span class="n">color</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+                <span class="c1"># if not, it should be used directly as the node_target_values.</span>
+            <span class="n">label_color</span> <span class="o">=</span> <span class="p">[</span><span class="n">legend_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">e_cat</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">e_cat</span> <span class="ow">in</span> <span class="n">encoded_cat</span><span class="p">]</span>
+            <span class="n">get_label_color_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">encoded_cat</span><span class="p">,</span> <span class="n">label_color</span><span class="p">))</span>
+
+            <span class="c1"># add categorical legend</span>
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">encoded_cat</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">label_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[],</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">get_label_color_dict</span><span class="p">[</span><span class="n">label</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+            <span class="n">legend</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">numpoints</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">)</span>
+            <span class="n">legend</span><span class="o">.</span><span class="n">get_frame</span><span class="p">()</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;#bebebe&#39;</span><span class="p">)</span>
+
+        <span class="c1"># add numerical colorbar</span>
+        <span class="k">elif</span> <span class="n">color</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;numerical&quot;</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fig_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">/</span> <span class="mi">9</span><span class="p">,</span> <span class="n">fig_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">legend_values</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">legend_lookup</span><span class="p">])</span>
+            <span class="n">legned_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">legend_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">legend_values</span><span class="p">]</span>
+
+            <span class="c1"># add color bar</span>
+            <span class="c1"># TODO: Implement more details of color bar and make it more robust.</span>
+            <span class="n">cmap</span> <span class="o">=</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="s1">&#39;my_cmap&#39;</span><span class="p">,</span> <span class="n">legned_colors</span><span class="p">)</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">legend_values</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">legend_values</span><span class="p">))</span>
+            <span class="n">sm</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
+            <span class="n">sm</span><span class="o">.</span><span class="n">set_array</span><span class="p">([])</span>
+
+            <span class="n">cb</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sm</span><span class="p">,</span>
+                              <span class="n">shrink</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                              <span class="n">pad</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">legend_values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># if minimum values of legend is not 0, it need to add a text to point out the minimum values.</span>
+                <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">legend_values</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">&gt;=</span> <span class="mf">0.1</span><span class="p">:</span>
+                    <span class="c1"># Determine whether the minimum value is too small to visualize pretty.</span>
+                    <span class="c1"># .2f indicates accurate to the second decimal place.</span>
+                    <span class="c1"># .2e indicated accurate to the second decimal after scientific notation.</span>
+                    <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">legend_values</span><span class="p">)),</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">legend_values</span><span class="p">)),</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">legend_values</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">&gt;=</span> <span class="mf">0.1</span><span class="p">:</span>
+                <span class="c1"># same as the minimum values</span>
+                <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.02</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">legend_values</span><span class="p">)),</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.02</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">legend_values</span><span class="p">)),</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">fig_size</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;spring&#39;</span><span class="p">:</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># the projection space is one dimensional</span>
+        <span class="k">if</span> <span class="n">node_positions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">decomposition</span><span class="o">.</span><span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">node_keys</span><span class="p">:</span>
+                <span class="n">data_in_node</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">graph</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]]</span>
+                <span class="n">pos</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">data_in_node</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)})</span>
+        <span class="k">elif</span> <span class="n">node_positions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">node_keys</span><span class="p">):</span>
+                <span class="n">pos</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="n">node_positions</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]})</span>
+
+        <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">)</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">node_keys</span><span class="p">)</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="s2">&quot;edges&quot;</span><span class="p">])</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">spring_layout</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">strength</span><span class="p">)</span>
+        <span class="c1"># add legend</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+                         <span class="n">node_size</span><span class="o">=</span><span class="n">sizes</span><span class="p">,</span>
+                         <span class="n">node_color</span><span class="o">=</span><span class="n">colorlist</span><span class="p">,</span>
+                         <span class="n">width</span><span class="o">=</span><span class="n">edge_width</span><span class="p">,</span>
+                         <span class="n">edge_color</span><span class="o">=</span><span class="p">[</span><span class="n">color_map</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;edges&quot;</span><span class="p">]],</span>
+                         <span class="n">with_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">fig_size</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="n">node_idx</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">node_keys</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">node_keys</span><span class="p">))))</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;edges&quot;</span><span class="p">]:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">node_positions</span><span class="p">[</span><span class="n">node_idx</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="mi">0</span><span class="p">],</span> <span class="n">node_positions</span><span class="p">[</span><span class="n">node_idx</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">0</span><span class="p">]],</span>
+                    <span class="p">[</span><span class="n">node_positions</span><span class="p">[</span><span class="n">node_idx</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="mi">1</span><span class="p">],</span> <span class="n">node_positions</span><span class="p">[</span><span class="n">node_idx</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">1</span><span class="p">]],</span>
+                    <span class="n">c</span><span class="o">=</span><span class="n">color_map</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">node_positions</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">node_positions</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+                   <span class="n">c</span><span class="o">=</span><span class="n">colorlist</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">sizes</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_arrows</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">projected_X</span><span class="p">,</span> <span class="n">safe_score</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pvalue</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+    <span class="n">min_p_value</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">5000</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">pvalue</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">min_p_value</span><span class="p">)</span>
+
+    <span class="n">node_pos</span> <span class="o">=</span> <span class="n">construct_node_data</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">projected_X</span><span class="p">)</span>
+
+    <span class="n">safe_score_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">safe_score</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;columns&#39;</span><span class="p">)</span>
+    <span class="n">safe_score_df</span> <span class="o">=</span> <span class="n">safe_score_df</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">safe_score_df</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">norm_df</span> <span class="o">=</span> <span class="n">safe_score_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">maxabs_scale</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;broadcast&#39;</span><span class="p">)</span>
+
+    <span class="n">x_cor</span> <span class="o">=</span> <span class="n">norm_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">node_pos</span><span class="o">.</span><span class="n">values</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">y_cor</span> <span class="o">=</span> <span class="n">norm_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">node_pos</span><span class="o">.</span><span class="n">values</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">x_cor</span> <span class="o">=</span> <span class="n">x_cor</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">y_cor</span> <span class="o">=</span> <span class="n">y_cor</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">arrow_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">x_cor</span><span class="p">,</span> <span class="n">y_cor</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x coordinate&#39;</span><span class="p">,</span> <span class="s1">&#39;y coordinate&#39;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">safe_score_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">all_fea_scale</span> <span class="o">=</span> <span class="n">maxabs_scale</span><span class="p">(</span><span class="n">safe_score_df</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="c1"># scale each arrow by the sum of safe score， maximun is 1 others are percentage not larger than 100%.</span>
+    <span class="n">scaled_ratio</span> <span class="o">=</span> <span class="n">max_length</span> <span class="o">*</span> <span class="n">all_fea_scale</span> <span class="o">/</span> <span class="n">arrow_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># using max length to multipy by scale ratio and denote the original length.</span>
+    <span class="n">scaled_arrow_df</span> <span class="o">=</span> <span class="n">arrow_df</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">scaled_ratio</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">scaled_arrow_df</span>
+
+
+<span class="k">def</span> <span class="nf">tm_plot</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span><span class="n">projected_X</span><span class="p">,</span><span class="n">filename</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;file&#39;</span><span class="p">,</span><span class="n">include_plotlyjs</span><span class="o">=</span><span class="s1">&#39;cdn&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_color_SAFE</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">vis_progressX</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">projected_X</span><span class="p">,</span><span class="n">simple</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span><span class="n">include_plotlyjs</span><span class="o">=</span><span class="n">include_plotlyjs</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span><span class="n">_color_SAFE</span><span class="o">=</span><span class="n">_color_SAFE</span><span class="p">,</span><span class="n">min_size</span><span class="o">=</span><span class="n">min_size</span><span class="p">,</span><span class="n">max_size</span><span class="o">=</span><span class="n">max_size</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="vis_progressX"><a class="viewcode-back" href="../../../api.html#tmap.tda.plot.vis_progressX">[docs]</a><span class="k">def</span> <span class="nf">vis_progressX</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">projected_X</span><span class="p">,</span> <span class="n">simple</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_color_SAFE</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For dynamic visualizing tmap construction process, it performs a interactive graph based on `plotly` with a slider to present the process from ordination to graph step by step. Currently, it doesn&#39;t provide any API for overriding the number of step from ordination to graph. It may be implemented at the future.</span>
+
+<span class="sd">    If you want to draw a simple graph with edges and nodes instead of the process,  try the params ``simple``.</span>
+
+<span class="sd">    This visualized function is mainly based on plotly which is a interactive Python graphing library. The params mode is trying to provide multiple type of return for different purpose. There are three different modes you can choose including &quot;file&quot; which return a html created by plotly, &quot;obj&quot; which return a reusable python dict object and &quot;web&quot; which normally used at notebook and make inline visualization possible.</span>
+
+<span class="sd">    The color part of this function has a little bit complex because of the multiple sub-figures. Currently, it use the ``tmap.tda.plot.Color`` class to auto generate color with given array. More detailed about how to auto generate color could be reviewed at the annotation of ``tmap.tda.plot.Color``.</span>
+
+<span class="sd">    In this function,  there are two kinds of color need to implement.</span>
+
+<span class="sd">        * First, all color and its showing text values of samples points should be followed by given color params. The color could be **any array** which represents some measurement of Nodes or Samples. **It doesn&#39;t have to be SAFE score**.</span>
+
+<span class="sd">        * Second, The ``_color_SAFE`` param should be a ``Color`` with a nodes-length array, which is normally a SAFE score.</span>
+
+
+<span class="sd">    :param graph:</span>
+<span class="sd">    :param np.array projected_X:</span>
+<span class="sd">    :param str mode: [file|obj|web]</span>
+<span class="sd">    :param bool simple:</span>
+<span class="sd">    :param color:</span>
+<span class="sd">    :param _color_SAFE:</span>
+
+<span class="sd">    :param kwargs:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">node_pos</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_positions&quot;</span><span class="p">]</span>
+    <span class="n">ori_MDS</span> <span class="o">=</span> <span class="n">projected_X</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;nodes&quot;</span><span class="p">]</span>
+    <span class="n">sizes</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_sizes&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">sample_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sample_names&quot;</span><span class="p">,</span> <span class="p">[]))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">minmax_scaler</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="n">min_size</span><span class="p">,</span> <span class="n">max_size</span><span class="p">))</span>
+    <span class="n">mms_color</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># init some empty values if color wasn&#39;t given</span>
+    <span class="n">target_v_raw</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">]</span>
+    <span class="n">target_v</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">]</span>
+    <span class="n">samples_colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;red&#39;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sample_names</span><span class="p">]</span>
+
+
+    <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">color_map</span><span class="p">,</span> <span class="n">target2colors</span> <span class="o">=</span> <span class="n">color</span><span class="o">.</span><span class="n">get_colors</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="s2">&quot;nodes&quot;</span><span class="p">])</span>
+        <span class="n">target_v</span> <span class="o">=</span> <span class="n">mms_color</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">target2colors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">target_v_raw</span> <span class="o">=</span> <span class="n">target2colors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="n">samples_colors</span><span class="p">,</span> <span class="n">cat2colors</span> <span class="o">=</span> <span class="n">color</span><span class="o">.</span><span class="n">get_sample_colors</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">color</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;categorical&#39;</span><span class="p">:</span>
+            <span class="n">legend_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">color</span><span class="o">.</span><span class="n">label_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">target2colors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">color_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># For calculating the dynamic process. It need to be aligned first.</span>
+    <span class="c1"># reconstructing the ori_MDS into the samples_pos</span>
+    <span class="c1"># reconstructing the node_pos into the center_pos</span>
+    <span class="n">point_tmp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">center_tmp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">text_tmp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">samples_colors_dynamic</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+        <span class="n">point_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ori_MDS</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="p">:])</span>
+        <span class="n">center_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">node_pos</span><span class="p">[[</span><span class="n">n</span><span class="p">],</span> <span class="p">:]]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">n</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">text_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sample_names</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="n">n</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">samples_colors_dynamic</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">color_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="s1">&#39;blue&#39;</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">n</span><span class="p">])))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">samples_colors_dynamic</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;blue&quot;</span><span class="p">)</span>
+    <span class="n">samples_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">point_tmp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">center_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">center_tmp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">broadcast_samples_text</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">text_tmp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># For visualizing the movement of samples, it need to multiply one sample into multiple samples which is need to reconstruct pos,text.</span>
+
+    <span class="n">node_pos</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_positions&quot;</span><span class="p">]</span>
+    <span class="c1"># prepare edge data</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;edges&quot;</span><span class="p">]:</span>
+        <span class="n">xs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">node_pos</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
+               <span class="n">node_pos</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
+               <span class="kc">None</span><span class="p">]</span>
+        <span class="n">ys</span> <span class="o">+=</span> <span class="p">[</span><span class="n">node_pos</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span>
+               <span class="n">node_pos</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span>
+               <span class="kc">None</span><span class="p">]</span>
+
+
+    <span class="c1"># if there are _color_SAFE, it will present two kinds of color.</span>
+    <span class="c1"># one is base on original data, one is transformed-SAFE data. Use the second one.</span>
+    <span class="k">if</span> <span class="n">_color_SAFE</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">safe_color</span><span class="p">,</span> <span class="n">safe_t2c</span> <span class="o">=</span> <span class="n">_color_SAFE</span><span class="o">.</span><span class="n">get_colors</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="s2">&quot;nodes&quot;</span><span class="p">])</span>
+        <span class="c1"># former is a dict which key is node id and values is node color</span>
+        <span class="c1"># second is a tuple (node values, node color)</span>
+        <span class="n">node_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">safe_color</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">))]</span>
+        <span class="n">target_v</span> <span class="o">=</span> <span class="n">mms_color</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">safe_t2c</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>  <span class="c1"># minmaxscaled node values</span>
+        <span class="n">target_v_raw</span> <span class="o">=</span> <span class="n">safe_t2c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>  <span class="c1"># raw node values</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">node_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">color_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_</span><span class="p">,</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">))]</span>
+
+    <span class="c1"># prepare node &amp; samples text</span>
+    <span class="n">node_vis_vals</span> <span class="o">=</span> <span class="n">target_v_raw</span>  <span class="c1"># todo: test categorical color passed.</span>
+    <span class="c1"># values output from color.target. It need to apply mean function for a samples-length color.target.</span>
+    <span class="n">node_text</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span>
+                 <span class="c1"># node id</span>
+                 <span class="s2">&quot;&lt;Br&gt;vals:</span><span class="si">%s</span><span class="s2">&lt;Br&gt;&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span>
+                 <span class="c1"># node values output from color.target.</span>
+                 <span class="s1">&#39;&lt;Br&gt;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample_names</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="n">n</span><span class="p">]])</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span>
+                 <span class="c1"># samples name concated with line break.</span>
+                 <span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span>
+                     <span class="n">node_vis_vals</span><span class="p">)]</span>
+    <span class="c1">### samples text</span>
+    <span class="n">samples_text</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sample ID:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">_</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sample_names</span><span class="p">]</span>
+
+
+    <span class="n">nv2c</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">target_v</span><span class="p">,</span> <span class="n">node_colors</span><span class="p">))</span>  <span class="c1"># A dict which includes values of node to color</span>
+    <span class="n">colorscale</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">target_v</span><span class="p">)):</span>
+        <span class="n">colorscale</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">_</span><span class="p">,</span> <span class="n">nv2c</span><span class="p">[</span><span class="n">_</span><span class="p">]])</span>
+    <span class="n">colorscale</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># the last value must be 1</span>
+    <span class="n">colorscale</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># the first value must be 0</span>
+
+    <span class="n">node_line</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+        <span class="c1"># ordination line</span>
+        <span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">ys</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8E9DA2&quot;</span><span class="p">,</span>
+                    <span class="n">opacity</span><span class="o">=</span><span class="mf">0.7</span><span class="p">),</span>
+        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">)</span>
+    <span class="n">node_marker</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+        <span class="c1"># node position</span>
+        <span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">node_pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">node_pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="n">text</span><span class="o">=</span><span class="n">node_text</span><span class="p">,</span>
+        <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">node_colors</span><span class="p">,</span>
+                    <span class="n">size</span><span class="o">=</span><span class="n">minmax_scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sizes</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">))])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+                    <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">)</span>
+    <span class="n">sample_markers</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+        <span class="n">visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">ori_MDS</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">ori_MDS</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">samples_colors</span><span class="p">),</span>
+        <span class="n">text</span><span class="o">=</span><span class="n">samples_text</span><span class="p">,</span>
+        <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+        <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">)</span>
+    <span class="c1">### After all prepared work have been finished.</span>
+    <span class="c1"># Append all traces instance into fig</span>
+
+    <span class="k">if</span> <span class="n">simple</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plotly</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">make_subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">node_line</span><span class="p">[</span><span class="s1">&#39;visible&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">node_marker</span><span class="p">[</span><span class="s1">&#39;visible&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">node_line</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">color</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;numerical&#39;</span><span class="p">:</span>
+                <span class="n">node_marker</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_v_raw</span>
+                <span class="n">node_marker</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;colorscale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">colorscale</span>
+                <span class="n">node_marker</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">][</span><span class="s1">&#39;showscale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">node_marker</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">minmax_scaler</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sizes</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">))])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">legend_names</span><span class="p">):</span>
+                    <span class="n">node_marker</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                        <span class="c1"># node position</span>
+                        <span class="n">visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">x</span><span class="o">=</span><span class="n">node_pos</span><span class="p">[</span><span class="n">legend_names</span> <span class="o">==</span> <span class="n">cat</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="n">y</span><span class="o">=</span><span class="n">node_pos</span><span class="p">[</span><span class="n">legend_names</span> <span class="o">==</span> <span class="n">cat</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="n">text</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_text</span><span class="p">)[</span><span class="n">legend_names</span> <span class="o">==</span> <span class="n">cat</span><span class="p">],</span>
+                        <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+                        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">cat2colors</span><span class="p">[</span><span class="n">cat</span><span class="p">],</span>
+                                    <span class="n">size</span><span class="o">=</span><span class="n">minmax_scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sizes</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">))[</span><span class="n">legend_names</span> <span class="o">==</span> <span class="n">cat</span><span class="p">]])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+                                    <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                        <span class="n">name</span><span class="o">=</span><span class="n">cat</span><span class="p">,</span>
+                        <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">)</span>
+                    <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">node_marker</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">node_marker</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plotly</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">make_subplots</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">specs</span><span class="o">=</span><span class="p">[[{</span><span class="s1">&#39;rowspan&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="p">{}],</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">{}]],</span>
+                                         <span class="c1"># subplot_titles=(&#39;Mapping process&#39;, &#39;Original projection&#39;, &#39;tmap graph&#39;)</span>
+                                         <span class="p">)</span>
+        <span class="c1"># original place or ordination place</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">sample_markers</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># dynamic process to generate 5 binning positions</span>
+        <span class="n">n_step</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># s = 1: move 1/steps</span>
+            <span class="c1"># s = steps: move to node position.</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">samples_pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">center_pos</span> <span class="o">-</span> <span class="n">samples_pos</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_step</span> <span class="o">*</span> <span class="n">s</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">samples_pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="n">center_pos</span> <span class="o">-</span> <span class="n">samples_pos</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_step</span> <span class="o">*</span> <span class="n">s</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">samples_colors_dynamic</span><span class="p">),</span>
+                <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+                <span class="n">text</span><span class="o">=</span><span class="n">broadcast_samples_text</span><span class="p">,</span>
+                <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Order is important, do not change the order !!!</span>
+        <span class="c1"># There are the last 5 should be visible at any time</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">node_line</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">node_marker</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">node_line</span><span class="p">[</span><span class="s1">&#39;visible&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">node_marker</span><span class="p">[</span><span class="s1">&#39;visible&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">sample_markers</span><span class="p">[</span><span class="s1">&#39;visible&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">node_line</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">node_marker</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">sample_markers</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c1">############################################################</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">method</span><span class="o">=</span><span class="s1">&#39;restyle&#39;</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;visible&#39;</span><span class="p">,</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_step</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">]],</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">n_step</span><span class="p">:</span>
+                <span class="n">step</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>  <span class="c1"># The last 5 should be some traces must present at any time.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">step</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Toggle i&#39;th trace to &quot;visible&quot;</span>
+            <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+
+        <span class="n">sliders</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">active</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">currentvalue</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;status: &quot;</span><span class="p">},</span>
+            <span class="n">pad</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span>
+            <span class="n">steps</span><span class="o">=</span><span class="n">steps</span>
+        <span class="p">)]</span>
+        <span class="c1">############################################################</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">sliders</span><span class="o">=</span><span class="n">sliders</span><span class="p">,</span>
+                      <span class="n">width</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+                      <span class="n">height</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                      <span class="n">xaxis1</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># &quot;range&quot;: [0, 1],</span>
+                          <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]},</span>
+                      <span class="n">yaxis1</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># &quot;range&quot;: [0, 1],</span>
+                          <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]},</span>
+                      <span class="n">xaxis2</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># &quot;range&quot;: [0, 1],</span>
+                          <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">]},</span>
+                      <span class="n">yaxis2</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># &quot;range&quot;: [0, 1],</span>
+                          <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]},</span>
+                      <span class="n">xaxis3</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># &quot;range&quot;: [0, 1],</span>
+                          <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">]},</span>
+                      <span class="n">yaxis3</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># &quot;range&quot;: [0, 1],</span>
+                          <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]},</span>
+                      <span class="n">hovermode</span><span class="o">=</span><span class="s2">&quot;closest&quot;</span>
+                      <span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;file&#39;</span><span class="p">:</span>
+        <span class="n">plotly</span><span class="o">.</span><span class="n">offline</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;web&#39;</span><span class="p">:</span>
+        <span class="n">plotly</span><span class="o">.</span><span class="n">offline</span><span class="o">.</span><span class="n">iplot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;obj&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fig</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mode params must be one of &#39;file&#39;, &#39;web&#39;, &#39;obj&#39;. </span><span class="se">\n</span><span class="s2"> &#39;file&#39;: output html file </span><span class="se">\n</span><span class="s2"> &#39;web&#39;: show in web browser. </span><span class="se">\n</span><span class="s2"> &#39;obj&#39;: return a dict object.&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">draw_enriched_plot</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">safe_score</span><span class="p">,</span> <span class="n">fea</span><span class="p">,</span> <span class="n">metainfo</span><span class="p">,</span> <span class="n">_filter_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Draw simple node network which only show component which is larger than _filter_size and colorized with</span>
+<span class="sd">    its safe_score.</span>
+
+<span class="sd">    :param graph:</span>
+<span class="sd">    :param safe_score:</span>
+<span class="sd">    :param fea:</span>
+<span class="sd">    :param metainfo:</span>
+<span class="sd">    :param _filter_size:</span>
+<span class="sd">    :param kwargs:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">enriched_nodes</span><span class="p">,</span> <span class="n">comps_nodes</span> <span class="o">=</span> <span class="n">metainfo</span><span class="p">[</span><span class="n">fea</span><span class="p">]</span>
+
+    <span class="n">node_pos</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_positions&quot;</span><span class="p">]</span>
+    <span class="n">sizes</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;node_sizes&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plotly</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">make_subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">[</span><span class="s2">&quot;edges&quot;</span><span class="p">]:</span>
+        <span class="n">xs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">node_pos</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
+               <span class="n">node_pos</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span>
+               <span class="kc">None</span><span class="p">]</span>
+        <span class="n">ys</span> <span class="o">+=</span> <span class="p">[</span><span class="n">node_pos</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span>
+               <span class="n">node_pos</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">],</span>
+               <span class="kc">None</span><span class="p">]</span>
+
+    <span class="n">node_line</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+        <span class="c1"># ordination line</span>
+        <span class="n">visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">ys</span><span class="p">,</span>
+        <span class="n">hoverinfo</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#8E9DA2&quot;</span><span class="p">,</span> <span class="p">),</span>
+        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">node_line</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">nodes</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">comps_nodes</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_filter_size</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">_filter_size</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="n">tmp1</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">nodes</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">safe_score</span><span class="p">[</span><span class="n">fea</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">node_position</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="c1"># node position</span>
+            <span class="n">visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">node_pos</span><span class="p">[[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">safe_score</span><span class="p">[</span><span class="n">fea</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tmp1</span><span class="p">[</span><span class="n">k</span><span class="p">])],</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">node_pos</span><span class="p">[[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">safe_score</span><span class="p">[</span><span class="n">fea</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tmp1</span><span class="p">[</span><span class="n">k</span><span class="p">])],</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;node:</span><span class="si">%s</span><span class="s1">,SAFE:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">safe_score</span><span class="p">[</span><span class="n">fea</span><span class="p">][</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">safe_score</span><span class="p">[</span><span class="n">fea</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tmp1</span><span class="p">[</span><span class="n">k</span><span class="p">])],</span>
+            <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>  <span class="c1"># color=node_colors,</span>
+                <span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span> <span class="o">+</span> <span class="n">sizes</span><span class="p">[</span><span class="n">_</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">safe_score</span><span class="p">[</span><span class="n">fea</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tmp1</span><span class="p">[</span><span class="n">k</span><span class="p">])]],</span>
+                <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
+            <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;comps_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">idx</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">node_position</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">fea</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="mi">1500</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">1500</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">hovermode</span> <span class="o">=</span> <span class="s1">&#39;closest&#39;</span>
+    <span class="n">plotly</span><span class="o">.</span><span class="n">offline</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">pair_draw</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">projected_X</span><span class="p">,</span> <span class="n">fit_result</span><span class="p">,</span> <span class="n">safe_scores</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">fea1</span><span class="p">,</span> <span class="n">fea2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">p_value</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="n">fea2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">subtitles</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> ordination&#39;</span> <span class="o">%</span> <span class="n">fea1</span><span class="p">,</span>
+                     <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Tmap&#39;</span> <span class="o">%</span> <span class="n">fea1</span><span class="p">,</span>
+                     <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> ordination&#39;</span> <span class="o">%</span> <span class="n">fea2</span><span class="p">,</span>
+                     <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Tmap&#39;</span> <span class="o">%</span> <span class="n">fea2</span><span class="p">]</span>
+        <span class="n">feas</span> <span class="o">=</span> <span class="p">[</span><span class="n">fea1</span><span class="p">,</span> <span class="n">fea2</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">subtitles</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> ordination&#39;</span> <span class="o">%</span> <span class="n">fea1</span><span class="p">,</span>
+                     <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Tmap&#39;</span> <span class="o">%</span> <span class="n">fea1</span><span class="p">]</span>
+        <span class="n">feas</span> <span class="o">=</span> <span class="p">[</span><span class="n">fea1</span><span class="p">]</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">make_subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">subplot_titles</span><span class="o">=</span><span class="n">subtitles</span><span class="p">,</span>
+                              <span class="n">horizontal_spacing</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                              <span class="n">vertical_spacing</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">draw_ord_and_tmap</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">projected_X</span><span class="p">,</span> <span class="n">fit_result</span><span class="p">,</span> <span class="n">fea</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fea</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">fea</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">target_by</span><span class="o">=</span><span class="s1">&#39;sample&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error occur, </span><span class="si">%s</span><span class="s1"> seem like a new feature for given data&#39;</span> <span class="o">%</span> <span class="n">fea</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">projected_X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+                                    <span class="n">y</span><span class="o">=</span><span class="n">projected_X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+                                    <span class="c1">#                                      text=metadata.loc[:,fea],</span>
+                                    <span class="n">hoverinfo</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">,</span>
+                                    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers&#39;</span><span class="p">,</span>
+                                    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="o">.</span><span class="n">get_sample_colors</span><span class="p">())</span>
+                                    <span class="p">,</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                         <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fea</span> <span class="ow">in</span> <span class="n">fit_result</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">fit_result</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fea</span><span class="p">,</span> <span class="s1">&#39;adj_Source&#39;</span><span class="p">]],</span>
+                                        <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">fit_result</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fea</span><span class="p">,</span> <span class="s1">&#39;adj_End&#39;</span><span class="p">]],</span>
+                                        <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines+text&#39;</span><span class="p">,</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                        <span class="n">text</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">fit_result</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fea</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">],</span> <span class="mi">4</span><span class="p">)]),</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+
+    <span class="n">min_p_value</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_iter</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">p_value</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">min_p_value</span><span class="p">)</span>
+    <span class="n">enriched_nodes</span> <span class="o">=</span> <span class="n">get_enriched_nodes</span><span class="p">(</span><span class="n">safe_scores</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+
+    <span class="n">fig_container</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">fea</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feas</span><span class="p">):</span>
+        <span class="n">draw_ord_and_tmap</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">projected_X</span><span class="p">,</span> <span class="n">fit_result</span><span class="p">,</span> <span class="n">fea</span><span class="p">,</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">cache</span> <span class="o">=</span> <span class="p">{</span><span class="n">node</span><span class="p">:</span> <span class="n">safe_scores</span><span class="p">[</span><span class="n">fea</span><span class="p">][</span><span class="n">node</span><span class="p">]</span> <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">enriched_nodes</span><span class="p">[</span><span class="n">fea</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">safe_scores</span><span class="p">[</span><span class="n">fea</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">vis_progressX</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">projected_X</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">Color</span><span class="p">(</span><span class="n">cache</span><span class="p">,</span> <span class="n">target_by</span><span class="o">=</span><span class="s1">&#39;node&#39;</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;obj&#39;</span><span class="p">,</span> <span class="n">simple</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fig_container</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fig_container</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">append_trace</span><span class="p">(</span><span class="n">_</span><span class="p">,</span>
+                             <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                             <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">2000</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="mi">2000</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">xaxis1</span><span class="o">.</span><span class="n">zeroline</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">yaxis1</span><span class="o">.</span><span class="n">zeroline</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">xaxis3</span><span class="o">.</span><span class="n">zeroline</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">yaxis3</span><span class="o">.</span><span class="n">zeroline</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">hovermode</span> <span class="o">=</span> <span class="s1">&#39;closest&#39;</span>
+    <span class="c1"># showticklabels</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;xaxis&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;yaxis&#39;</span><span class="p">):</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">[</span><span class="n">_</span><span class="p">][</span><span class="s1">&#39;showticklabels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">annotations</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">[</span><span class="s1">&#39;font&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">25</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">fig</span>
+    <span class="c1"># plotly.offline.plot(fig, auto_open=False, **kwargs)</span>
+    <span class="c1"># plotly.offline.iplot(fig)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Tianhua Liao, YuChen Wei, Haokui Zhou.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/language_data.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

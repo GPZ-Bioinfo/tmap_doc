@@ -5,11 +5,16 @@ How *tmap* work
 
 A tmap workflow consists of three major steps, as illustrated in **Fig.1**.
 
-1. The first step is to project a microbiome dataset into a low dimensional space using dimension reduction techniques for a specified distance metric. This step uses filters/lenses functions for mapping the original data points to their low dimensional coordinates. For instance, the first two principal coordinates of PCoA can be used as filters. After that, tmap performs topological covering and clustering of the projected data. The choice of different parameters for covering and clustering will result in different resolutions and details of topological patterns to be captured. Depending on the sample size and a desired resolution of microbiome variation, different sets of parameters can be tried and evaluated. A detailed explanation and guideline (online document) are provided for this process. This step also generates a TDA network for visualization and exploration of the microbiome using color maps on the network. Any target variable associated with the nodes can be used to color the network, such as metadata, taxon abundance, statistics or summary score.
-2. In the second step, network enrichment analysis is performed to derive a SAFE score on each node for each target variable (see below for details).
-3. The last step uses SAFE scores for network stratification, metadata association and ordination, and co-enrichment analysis.
+a. The first step is to construct a TDA network.
 
-.. image:: img/Figure1.png
+  * project a microbiome dataset into a low dimensional space using dimension reduction techniques for a specified distance metric. This step uses filters/lenses functions for mapping the original data points to their low dimensional coordinates. For instance, the first two principal coordinates of PCoA can be used as filters.
+  * After that, tmap performs topological covering and clustering of the projected data. The choice of different parameters for covering and clustering will result in different resolutions and details of topological patterns to be captured. Depending on the sample size and a desired resolution of microbiome variation, different sets of parameters can be tried and evaluated.
+  * This step finally generates a TDA network for visualization and exploration of the microbiome using color maps on the network. Any target variable associated with the nodes can be used to color the network, such as metadata, taxon abundance, statistics or summary score.
+
+b. In the second step, network enrichment analysis is performed to derive a SAFE score on each node for each target variable (see below for details).
+c. The last step uses SAFE scores for network stratification, metadata association and ordination, and co-enrichment analysis.
+
+.. image:: img/Fig1.png
     :alt: tmap workflow
     :align: center
 
@@ -19,7 +24,7 @@ Compared with other *Mapper* software, *tmap* was designed with the following ad
 2. APIs for each step in *tmap* have been carefully designed to allow for easy incorporation of off-the-shelf machine learning methods from other Python library, such as *scikit-learn*. Therefore, users can easily extend the *tmap* workflow using their customized functions, or integrate *tmap* into their own data analysis pipeline.
 3. *tmap* comes with network visualization and analysis functions, including mapping of target variables for exploratory analysis and network enrichment for association analysis. These functions are unique in *tmap*, and are designed to help with microbiome analysis, for identifying driver species and microbiome-wide association analysis.
 
-In the following sections, we will cover details on the *Mapper* algorithm and the *SAFE* algorithm, which are core techniques used in the *tmap* workflow. Having a solid understanding of these techniques can help to use *tmap* in its full potential, or to extend the framework with other off-the-shelf machine learning methods.
+In the following sections, we will cover details on the ***Mapper*** algorithm and the ***SAFE*** algorithm, which are core techniques used in the *tmap* workflow. Having a solid understanding of these techniques can help to use *tmap* in its full potential, or to extend the framework with other off-the-shelf machine learning methods.
 
 The *Mapper* algorithm
 ===================================
@@ -46,29 +51,27 @@ Once a TDA network has been constructed, network-based enrichment analysis can b
 
 The **SAFE** algorithm takes the following steps to calculate an enrichment score (SAFE score) of each node in a network for a given target variable:
 
-1. Input of a network constructed by *tmap*, along with a target variable (or multiple target variables) of the studied samples. In ```netx.SAFE``, *tmap* implements two major functions ``SAFE_batch`` and ``SAFE``, which are *batch version* and *single version* for calculating SAFE scores.
+1. This algorithm starts with a constructed TDA network and a target variable (or multiple target variables) of metadata or taxa. For each node ``u`` in the network, **SAFE** defines a local neighborhood of ``u`` by identifying any other nodes that are closer than or equal to a maximum distance threshold ``d`` to ``u``. Node distance is measured via shortest path length between nodes. By default, **the maximum distance threshold** ``d`` is set to be equal to the *0.5th* percentile of all pairwise node distances in the network.
 
-2. For each node ``u`` in the network, SAFE defines the local neighborhood of ``u`` by identifying any other nodes that are closer than a maximum distance threshold (`d`) to ``u``. Node distance is measured using either the **weighted shortest path length** or the **unweighted shortest path length**. By default, the maximum distance threshold ``d`` equals to the 0.5th-percentile of all pair-wise node distances in the network.
-
-3. For each neighborhood, SAFE sums the values of neighbor nodes for a functional attribute of interest (a target variable) as a neighborhood score. The score is then compared to a distribution of ``n`` random neighborhood scores obtained by shuffling the target variable of nodes in the network **independently**. The significance of enrichment is determined as the probability that a random observation from the distribution will fall into the interval between the origin neighborhood score (**Observed values**) and infinite.
-
-4. Convert neighborhood significance p-values into neighborhood enrichment scores ``O``, normalized to a range from 0 to 1, by computing:
+2. For each neighborhood, **SAFE** sums the values of neighbor nodes for a target variable as an observed neighborhood score ``S``. The score is then compared with the distribution of permuted neighborhood scores obtained by randomly shuffling the target variable among nodes in the network. The significance of enrichment ``P`` is determined as the probability that a random observation from the distribution will fall into the interval between the observed neighborhood score ``S`` and the largest value of the permuted scores. The neighborhood significance of enrichment ``P`` is converted into a neighborhood enrichment score ``O``, named SAFE score, as below (normalized to a range from 0 to 1):
 
 .. math::
 
-    P = \frac{m}{n}
+    P_{n} = \frac{m}{I}
+
+where ``m`` is the number of times a observed value is greater than or equal to shuffled values; ``I`` is the number of shuffles;
 
 .. math::
 
-    O_{n} = \frac{-log_{10}(max(P_{n},\frac{1}{n+1}))}{-log_{10}\frac{1}{n+1}}
+    O_{n} = \frac{-log_{10}(max(P_{n},\frac{1}{I+1}))}{-log_{10}\frac{1}{I+1}}
 
-where ``n`` is the times of permutations, ``m`` is number of times a observed value is greater than or equal to shuffled values, ``O`` is the neighborhood enrichment score of node *n*. This permutation is performed independently for each target variable when there are more than one.
+where ``I`` is the number of shuffles; ``P`` is the neighborhood significance of enrichment of node ``n``; and ``O`` is the neighborhood enrichment score (**SAFE score**) of node ``n``. Random shuffle is performed independently for each target variable when there are more than one.
 
-5. A node is considered significantly enriched given a p-value threshold of ``0.05`` if:
+3. A node is considered to be significantly **enriched** under a p-value threshold of *0.05* (which can be specified in *tmap*), which can be translated to a threshold of SAFE score by:
 
 .. math::
 
-    O_{n} \ge \frac{-\log_{10} 0.05}{-\log_{10} \frac{1}{n+1}}
+    O_{n} \ge \frac{-\log_{10} 0.05}{-\log_{10} \frac{1}{I+1}}
 
 6. Filter and rank target variables using **number of significant nodes** or **sum of SAFE score of significant nodes** (for more details on SAFE score summary please see the following **SAFE summary in tmap**).
 

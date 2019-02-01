@@ -1,0 +1,352 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>How tmap work &mdash; tmap 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Microbiome Examples" href="example.html" />
+    <link rel="prev" title="Network Statistical Analysis in tmap" href="statistical.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> tmap
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Usage of <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="param.html">How to Choose Parameters in <em>tmap</em></a></li>
+<li class="toctree-l1"><a class="reference internal" href="vis.html">Visualizing and Exploring TDA Network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statistical.html">Network Statistical Analysis in <em>tmap</em></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How <em>tmap</em> work</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-mapper-algorithm">The <em>Mapper</em> algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-safe-algorithm">The SAFE algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#safe-summary-in-tmap">SAFE summary in <em>tmap</em></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Microbiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tmap</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>How <em>tmap</em> work</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/how2work.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="how-tmap-work">
+<h1>How <em>tmap</em> work<a class="headerlink" href="#how-tmap-work" title="Permalink to this headline">¶</a></h1>
+<p><strong>Topological data analysis</strong> (<strong>TDA</strong>) is the application of topological analysis techniques to study datasets in high dimensional space, to capture topological properties of a dataset which are invariant to noise and scales. Currently, there are two common techniques of TDA: <strong>persistent homology</strong> and the <strong>Mapper</strong> algorithm. <strong>tmap</strong> is an implementation of the <em>Mapper</em> algorithm in Python, and is a TDA framework designed from microbiome data analysis. Because of the generality of the framework, <em>tmap</em> can also be used to analyze high dimensional datasets other than microbiome. <a class="reference internal" href="reference.html#ref1" id="id1">[Ref1]</a></p>
+<p>A tmap workflow consists of three major steps, as illustrated in <strong>Fig.1</strong>.</p>
+<ol class="loweralpha simple">
+<li>The first step is to construct a TDA network.</li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li>project a microbiome dataset into a low dimensional space using dimension reduction techniques for a specified distance metric. This step uses filters/lenses functions for mapping the original data points to their low dimensional coordinates. For instance, the first two principal coordinates of PCoA can be used as filters.</li>
+<li>After that, tmap performs topological covering and clustering of the projected data. The choice of different parameters for covering and clustering will result in different resolutions and details of topological patterns to be captured. Depending on the sample size and a desired resolution of microbiome variation, different sets of parameters can be tried and evaluated.</li>
+<li>This step finally generates a TDA network for visualization and exploration of the microbiome using color maps on the network. Any target variable associated with the nodes can be used to color the network, such as metadata, taxon abundance, statistics or summary score.</li>
+</ul>
+</div></blockquote>
+<ol class="loweralpha simple" start="2">
+<li>In the second step, network enrichment analysis is performed to derive a SAFE score on each node for each target variable (see below for details).</li>
+<li>The last step uses SAFE scores for network stratification, metadata association and ordination, and co-enrichment analysis.</li>
+</ol>
+<img alt="tmap workflow" class="align-center" src="_images/Figure1.png" />
+<p>Compared with other <em>Mapper</em> software, <em>tmap</em> was designed with the following advantageous features, especially for analyzing microbiome dataset:</p>
+<ol class="arabic simple">
+<li>Outputs from standard microbiome analysis pipelines, such as QIIME and USEARCH, can be used as direct inputs into <em>tmap</em>. Particularly, various precomputed beta-diversity distance matrices can be reused by <em>tmap</em>. Other customized and precomputed distance matrix, dimension reduction results, can also be used as input into <em>tmap</em> to save computation time.</li>
+<li>APIs for each step in <em>tmap</em> have been carefully designed to allow for easy incorporation of off-the-shelf machine learning methods from other Python library, such as <em>scikit-learn</em>. Therefore, users can easily extend the <em>tmap</em> workflow using their customized functions, or integrate <em>tmap</em> into their own data analysis pipeline.</li>
+<li><em>tmap</em> comes with network visualization and analysis functions, including mapping of target variables for exploratory analysis and network enrichment for association analysis. These functions are unique in <em>tmap</em>, and are designed to help with microbiome analysis, for identifying driver species and microbiome-wide association analysis.</li>
+</ol>
+<p>In the following sections, we will cover details on the <strong>*Mapper*</strong> algorithm and the <strong>*SAFE*</strong> algorithm, which are core techniques used in the <em>tmap</em> workflow. Having a solid understanding of these techniques can help to use <em>tmap</em> in its full potential, or to extend the framework with other off-the-shelf machine learning methods.</p>
+<div class="section" id="the-mapper-algorithm">
+<h2>The <em>Mapper</em> algorithm<a class="headerlink" href="#the-mapper-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>The <em>Mapper</em> algorithm consists of four basic steps, from defining a metric space of point cloud, projecting data points onto a low dimensional space, filtering and binning of projected data, to constructing a network representation, as illustrating in the following figure.</p>
+<a class="reference internal image-reference" href="_images/basic_pipelines.jpg"><img alt="basic_pipelines" class="align-center" src="_images/basic_pipelines.jpg" style="width: 446.59999999999997px; height: 729.75px;" /></a>
+<ol class="arabic simple">
+<li>When we get a real world dataset, first we need to choose a distance metric to describe the distance between each pair of points. As in the above <strong>figure A</strong>, a three-dimensional Euclidean distance metric is used. Predefined metric can also be used by providing a <code class="docutils literal notranslate"><span class="pre">precomputed</span></code> distance matrix to the pipeline. The defined metric will be used by a <strong>filter</strong> function for data projection (or dimension reduction).</li>
+<li>Next, <em>Mapper</em> projects the original data cloud to a low dimensional space, by using a <strong>filter</strong> function, which can be <strong>PCA</strong>, <strong>MDS</strong>, <strong>t-SNE</strong>, or any other dimension reduction method. In the above <strong>fiugre B</strong>, the <strong>filter</strong> function is just the <em>x-coordinate</em> of the original data cloud, in which the data points are colored by the filter function. Different filters can also be combined to form <em>lens</em>, or a low dimensional space. Usually, <em>Mapper</em> uses a two-dimensional space of projected data.</li>
+<li>After <strong>filtering</strong>, the projected dataset is binned into groups (<em>hypercube</em>) of data points, by a <strong>cover</strong>, which is a collection of intervals along the filters. A <strong>cover</strong> can be specified via two resolution parameters (<code class="docutils literal notranslate"><span class="pre">resolution</span></code>: number of intervals, and <code class="docutils literal notranslate"><span class="pre">overlap</span></code>: percentage of overlap between adjacent intervals). As in the above <strong>figure C</strong>, the original dataset is binned into overlapped intervals along the filter of the <em>x-coordinate</em> of the data cloud.</li>
+<li>The final step of <em>Mapper</em> is clustering and network construction. Clustering is performed on each bin/hypercube of data points to identify clusters of data points in the <strong>original data space</strong>, rather than in the projected data space. Network construction is based on the clustering results: each cluster forms a node in the network, and edges are made between two nodes if they have common samples shared by their corresponding clusters. Therefore, the resulted TDA network, as shown in <strong>figure D</strong>, is a compressive network representation of the underlying ‘data shape’, which is an abstract shape of a human hand in this case. <a class="reference internal" href="reference.html#ref2" id="id2">[Ref2]</a></li>
+</ol>
+</div>
+<div class="section" id="the-safe-algorithm">
+<h2>The SAFE algorithm<a class="headerlink" href="#the-safe-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>Once a TDA network has been constructed, network-based enrichment analysis can be performed for target variables, or properties of the studied data samples. <em>tmap</em> adopts <strong>the spatial analysis of functional enrichment</strong> (<strong>SAFE</strong>) for network enrichment analysis. This algorithm is originally developed as a systematic method for annotating biological networks and examining their functional associations. <a class="reference internal" href="reference.html#ref3" id="id3">[Ref3]</a></p>
+<p>The <strong>SAFE</strong> algorithm takes the following steps to calculate an enrichment score (SAFE score) of each node in a network for a given target variable:</p>
+<ol class="arabic simple">
+<li>This algorithm starts with a constructed TDA network and a target variable (or multiple target variables) of metadata or taxa. For each node <code class="docutils literal notranslate"><span class="pre">u</span></code> in the network, <strong>SAFE</strong> defines a local neighborhood of <code class="docutils literal notranslate"><span class="pre">u</span></code> by identifying any other nodes that are closer than or equal to a maximum distance threshold <code class="docutils literal notranslate"><span class="pre">d</span></code> to <code class="docutils literal notranslate"><span class="pre">u</span></code>. Node distance is measured via shortest path length between nodes. By default, <strong>the maximum distance threshold</strong> <code class="docutils literal notranslate"><span class="pre">d</span></code> is set to be equal to the <em>0.5th</em> percentile of all pairwise node distances in the network.</li>
+<li>For each neighborhood, <strong>SAFE</strong> sums the values of neighbor nodes for a target variable as an observed neighborhood score <code class="docutils literal notranslate"><span class="pre">S</span></code>. The score is then compared with the distribution of permuted neighborhood scores obtained by randomly shuffling the target variable among nodes in the network. The significance of enrichment <code class="docutils literal notranslate"><span class="pre">P</span></code> is determined as the probability that a random observation from the distribution will fall into the interval between the observed neighborhood score <code class="docutils literal notranslate"><span class="pre">S</span></code> and the largest value of the permuted scores. The neighborhood significance of enrichment <code class="docutils literal notranslate"><span class="pre">P</span></code> is converted into a neighborhood enrichment score <code class="docutils literal notranslate"><span class="pre">O</span></code>, named SAFE score, as below (normalized to a range from 0 to 1):</li>
+</ol>
+<div class="math">
+<p><img src="_images/math/dab433fa59327995e023cdf9c631473d8eaba76e.png" alt="P_{n} = \frac{m}{I}"/></p>
+</div><p>where <code class="docutils literal notranslate"><span class="pre">m</span></code> is the number of times a observed value is greater than or equal to shuffled values; <code class="docutils literal notranslate"><span class="pre">I</span></code> is the number of shuffles;</p>
+<div class="math">
+<p><img src="_images/math/3480bf4edc43991065290af05778d0e9467d4131.png" alt="O_{n} = \frac{-log_{10}(max(P_{n},\frac{1}{I+1}))}{-log_{10}\frac{1}{I+1}}"/></p>
+</div><p>where <code class="docutils literal notranslate"><span class="pre">I</span></code> is the number of shuffles; <code class="docutils literal notranslate"><span class="pre">P</span></code> is the neighborhood significance of enrichment of node <code class="docutils literal notranslate"><span class="pre">n</span></code>; and <code class="docutils literal notranslate"><span class="pre">O</span></code> is the neighborhood enrichment score (<strong>SAFE score</strong>) of node <code class="docutils literal notranslate"><span class="pre">n</span></code>. Random shuffle is performed independently for each target variable when there are more than one.</p>
+<ol class="arabic simple" start="3">
+<li>A node is considered to be significantly <strong>enriched</strong> under a p-value threshold of <em>0.05</em> (which can be specified in <em>tmap</em>), which can be translated to a threshold of SAFE score by:</li>
+</ol>
+<div class="math">
+<p><img src="_images/math/534aaded7d12fa84c2a282fce82687c1342c6bc7.png" alt="O_{n} \ge \frac{-\log_{10} 0.05}{-\log_{10} \frac{1}{I+1}}"/></p>
+</div><ol class="arabic simple" start="6">
+<li>Filter and rank target variables using <strong>number of significant nodes</strong> or <strong>sum of SAFE score of significant nodes</strong> (for more details on SAFE score summary please see the following <strong>SAFE summary in tmap</strong>).</li>
+</ol>
+</div>
+<div class="section" id="safe-summary-in-tmap">
+<h2>SAFE summary in <em>tmap</em><a class="headerlink" href="#safe-summary-in-tmap" title="Permalink to this headline">¶</a></h2>
+<p>After obtaining SAFE scores of each feature, different statistical metrics of enrichment can be calculated and summarized based on the SAFE algorithm. Using providing codes below could help you easily summarized the overall enrichment condition.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tmap.netx.SAFE</span> <span class="kn">import</span> <span class="n">get_SAFE_summary</span>
+<span class="n">safe_summary</span> <span class="o">=</span> <span class="n">get_SAFE_summary</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">meta_data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">safe_scores</span><span class="o">=</span><span class="n">safe_scores</span><span class="p">,</span>
+                                <span class="n">n_iter_value</span><span class="o">=</span><span class="n">n_iter</span><span class="p">,</span> <span class="n">p_value</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The p-value threshold of <code class="docutils literal notranslate"><span class="pre">0.01</span></code> was set to select significant nodes for the calculation. The above <code class="docutils literal notranslate"><span class="pre">n_iter_value</span></code> was used to calculated lowest bound of SAFE scores and it need to be equivalent to the <code class="docutils literal notranslate"><span class="pre">n_iter</span></code> of providing safe_scores.</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_SAFE_summary</span></code> will result a DataFrame with following headers.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="19%" />
+<col width="81%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Header</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>SAFE total score</td>
+<td>Sum of SAFE enrichment scores of all nodes on the network map.</td>
+</tr>
+<tr class="row-odd"><td>SAFE enriched score</td>
+<td>Sum of SAFE enrichment scores of significantly enriched nodes.</td>
+</tr>
+<tr class="row-even"><td>enriched abundance ratio</td>
+<td>the sum of the attribute’s abundance for enriched node divide by the sum of attribute ‘s abundance for all nodes</td>
+</tr>
+<tr class="row-odd"><td>enriched SAFE score ratio</td>
+<td>the sum of SAFE enrichment score for enriched nodes divide by the sum of SAFE enrichment score for all nodes</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="example.html" class="btn btn-neutral float-right" title="Microbiome Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="statistical.html" class="btn btn-neutral" title="Network Statistical Analysis in tmap" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Tianhua Liao, YuChen Wei, Haokui Zhou.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
