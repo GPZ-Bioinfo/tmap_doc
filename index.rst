@@ -24,15 +24,19 @@ To install tmap, run::
     cd tmap
     python setup.py install
 
+Or using pip::
+
+    pip install tmap
+
 If you encounter any error like ``Import error: tkinter``, you need to run ``sudo apt install python-tk`` or ``sudo apt install python3-tk``.
 
-**Note**: We suggest using ``NetworkX 1.11`` for network analysis and plotting, otherwise using a newer version will return an inconsisent generator with the error ``AttributeError: 'generator' object has no attribute 'values'``.
+For more convenient usage, we implement some executable scripts which will automatically build upon ``$PATH``. For more information about these scripts, you could see.
 
 Contents
 ##########
 
 .. toctree::
-   :glob:
+   :maxdepth: 1
 
    basic.rst
    param.rst
@@ -40,6 +44,7 @@ Contents
    statistical.rst
    how2work.rst
    example.rst
+   scripts.rst
    api.rst
    reference.rst
    FAQ.rst
