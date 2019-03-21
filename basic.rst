@@ -26,7 +26,7 @@ Once we have prepared input data (in *pandas DataFrame* or a *numpy matrix*), we
 
 .. code-block:: python
 
-    from tmap.tda import mapper, filter
+    from tmap.tda import mapper, Filter
     from tmap.tda.cover import Cover
     from sklearn.cluster import DBSCAN
     from sklearn.preprocessing import StandardScaler,MinMaxScaler
@@ -34,7 +34,7 @@ Once we have prepared input data (in *pandas DataFrame* or a *numpy matrix*), we
     tm = mapper.Mapper(verbose=1)
 
     # Step2. Projection
-    lens = [filter.MDS(components=[0, 1],random_state=100)]
+    lens = [Filter.MDS(components=[0, 1],random_state=100)]
     projected_X = tm.filter(X, lens=lens)
     clusterer = DBSCAN(eps=0.75, min_samples=1)
     cover = Cover(projected_data=MinMaxScaler().fit_transform(projected_X), resolution=20, overlap=0.75)
@@ -84,11 +84,11 @@ For using custom distance metric from a precomputed distance matrix, you need to
 
     from scipy.spatial.distance import pdist,squareform
     from tmap.tda.metric import Metric
-    lens = [filter.MDS(components=[0, 1],metric=Metric('precomputed'))]
+    lens = [Filter.MDS(components=[0, 1],metric=Metric('precomputed'))]
     my_dist = squareform(pdist(X.values,metric="braycurtis"))
     projected_X = tm.filter(my_dist, lens=lens)
 
-A ``filter`` is a general technique to project data points from the original data space onto a low dimensional space. Different filter preserves different aspect of the original dataset, such as MDS, which try to preserve distances between data points. Therefore, a ``filter`` provides a *view* of the data to look through. Multiple *views* can be joined to present the data for topological analysis. Choice of filter depends on the studied dataset and research purpose. Projection of the original dataset using a specified filter has a global effect in determining the TDA network structure.
+A ``Filter`` is a general technique to project data points from the original data space onto a low dimensional space. Different filter preserves different aspect of the original dataset, such as MDS, which try to preserve distances between data points. Therefore, a ``filter`` provides a *view* of the data to look through. Multiple *views* can be joined to present the data for topological analysis. Choice of filter depends on the studied dataset and research purpose. Projection of the original dataset using a specified filter has a global effect in determining the TDA network structure.
 
 Different filters can be generated and combined into a ``lens`` using a Python list, and within each filter, different components can be specified with a index list. There are various filters implemented in the `filter` module, including PCA, MDS, and t-SNE. More filters can be easily incorporated using the defined APIs.
 
@@ -174,7 +174,7 @@ In addition to the use of SAFE score for feature coloring and visualization, var
 .. code-block:: python
 
     from tmap.netx.SAFE import get_SAFE_summary
-
+    
     safe_summary = get_SAFE_summary(graph=graph, meta_data=X, safe_scores=safe_scores,
                                     n_iter_value=1000, p_value=0.01)
 
@@ -196,8 +196,11 @@ With SAFE scores and a corresponding TDA graph, *p-value* and *correlation coeff
 
     from tmap.netx.coenrichment_analysis import pairwise_coenrichment
     from tmap.netx.SAFE import get_enriched_nodes
-    enriched_centroides, enriched_nodes = get_enriched_nodes(graph=graph,safe_scores=safe_scores,centroids=True)
-    asso_pairs = pairwise_coenrichment(graph,safe_scores,n_iter=1000,p_value=0.05,_pre_cal_enriched=enriched_centroides)
+    n_iter = 1000
+    p_value = 0.05
+    SAFE_pvalue = np.log10(p_value) / np.log10(1.0/(n_iter + 1.0))
+    enriched_centroides, enriched_nodes = get_enriched_nodes(graph=graph,safe_scores=safe_scores,SAFE_pvalue=SAFE_pvalue,centroids=True)
+    asso_pairs = pairwise_coenrichment(graph,safe_scores,n_iter=n_iter, p_value=p_value,_pre_cal_enriched=enriched_centroides)
     from statsmodels.sandbox.stats.multicomp import multipletests
     corrected_fe_dis = pd.DataFrame(multipletests(asso_pairs.values.reshape(-1,), method='fdr_bh')[1].reshape(asso_pairs.shape),
                                 index=asso_pairs.index,
