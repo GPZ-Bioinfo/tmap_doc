@@ -13,7 +13,7 @@ The following codes show how SAFE scores help to identify enriched nodes with si
     import os
     from sklearn.preprocessing import MinMaxScaler
     from sklearn.cluster import DBSCAN
-    from tmap.tda import mapper, filter
+    from tmap.tda import mapper, Filter
     from tmap.tda.cover import Cover
     from tmap.tda.plot import show, Color
     from tmap.tda.metric import Metric
@@ -31,7 +31,7 @@ The following codes show how SAFE scores help to identify enriched nodes with si
 
     # TDA Step2. Projection
     metric = Metric(metric="precomputed")
-    lens = [filter.MDS(components=[0, 1], metric=metric,random_state=100)]
+    lens = [Filter.MDS(components=[0, 1], metric=metric,random_state=100)]
     projected_X = tm.filter(dm, lens=lens)
 
     # Step4. Covering, clustering & mapping
@@ -65,7 +65,7 @@ Of course, besides the visualization based on ``matplotlib``, you could also use
 
     from tmap.tda.plot import vis_progressX,tm_plot,Color
     color = Color(target=safe_scores[target_feature], dtype='numerical', target_by="node")
-    tm_plot(graph,projected_X,color=color,filename='_static/SAFE_Bacteroides.html',auto_open=False)
+    tm_plot(graph,projected_X,color=color,filename='SAFE_Bacteroides.html',auto_open=False)
 
 .. raw:: html
 
@@ -113,7 +113,10 @@ When we get the SAFE score which represented enrichment scale of specific featur
 .. code-block:: python
 
     from tmap.netx.SAFE import get_enriched_nodes
-    enriched_centroides, enriched_nodes = get_enriched_nodes(graph,safe_scores,centroids=True)
+    min_p_value = 1.0 / (n_iter + 1.0)
+    p_value = 0.05
+    SAFE_pvalue = np.log10(p_value) / np.log10(min_p_value)
+    enriched_centroides, enriched_nodes = get_enriched_nodes(graph,safe_scores,SAFE_pvalue,centroids=True)
 
 Default, the function ``get_enriched_nodes`` only output the enriched nodes around the centroides. The difference between **neighborhood** and **centroides** could be find out at SAFE algorithm of :doc:`'How tmap work'<how2work>`.
 
@@ -122,7 +125,6 @@ Upon the enriched area, we can perform a network-based co-enrichment relationshi
 .. code-block:: python
 
     from tmap.netx.coenrichment_analysis import pairwise_coenrichment
-    from tmap.netx.SAFE import get_enriched_nodes
     asso_pairs = pairwise_coenrichment(graph,safe_scores,n_iter=1000,p_value=0.05,_pre_cal_enriched=enriched_centroides)
     # pre_cal_enriched could be none, and it will be calculated inside the pairwise_coenrichment function.
     from statsmodels.sandbox.stats.multicomp import multipletests
