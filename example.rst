@@ -20,7 +20,7 @@ To demonstrate and validate the performance of *tmap*, we benchmarked the result
     from __future__ import print_function
     from sklearn.preprocessing import MinMaxScaler
     from sklearn.cluster import DBSCAN
-    from tmap.tda import mapper, filter
+    from tmap.tda import mapper, Filter
     from tmap.tda.cover import Cover
     from tmap.tda.plot import show, Color
     from tmap.tda.metric import Metric
@@ -39,7 +39,7 @@ To demonstrate and validate the performance of *tmap*, we benchmarked the result
 
     # TDA Step2. Projection
     metric = Metric(metric="precomputed")
-    lens = [filter.MDS(components=[0, 1], metric=metric,random_state=100)]
+    lens = [Filter.MDS(components=[0, 1], metric=metric,random_state=100)]
     projected_X = tm.filter(dm, lens=lens)
 
     # Step4. Covering, clustering & mapping
@@ -105,12 +105,12 @@ More details about the codes used in this analysis can be found at ``test/test_D
     from __future__ import print_function
     from sklearn.preprocessing import MinMaxScaler
     from sklearn.cluster import DBSCAN
-    from tmap.tda import mapper, filter
+    from tmap.tda import mapper, Filter
     from tmap.tda.cover import Cover
     from tmap.tda.plot import show, Color
     from tmap.tda.metric import Metric
     from tmap.tda.utils import optimize_dbscan_eps,cover_ratio
-    from tmap.netx.SAFE import SAFE_batch, get_SAFE_summary,SAFE_single
+    from tmap.netx.SAFE import SAFE_batch, get_SAFE_summary
     from tmap.test import load_data
     from matplotlib.pyplot import title
     from scipy.spatial.distance import pdist,squareform
@@ -128,7 +128,7 @@ More details about the codes used in this analysis can be found at ``test/test_D
 
     # TDA Step2. Projection
     metric = Metric(metric="precomputed")
-    lens = [filter.MDS(components=[0, 1], metric=metric,random_state=100)]
+    lens = [Filter.MDS(components=[0, 1], metric=metric,random_state=100)]
     projected_X = tm.filter(dm, lens=lens)
 
     # Step4. Covering, clustering & mapping
