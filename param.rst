@@ -16,7 +16,7 @@ In the following code, we compare the effects of choosing different components f
     from sklearn.preprocessing import MinMaxScaler, StandardScaler
     from sklearn import datasets
     from sklearn.cluster import DBSCAN
-    from tmap.tda import mapper, filter
+    from tmap.tda import mapper, Filter
     from tmap.tda.cover import Cover
     from tmap.tda.plot import show, Color,vis_progressX
 
@@ -29,7 +29,7 @@ In the following code, we compare the effects of choosing different components f
     tm = mapper.Mapper(verbose=1)
 
     # Step2. Projection
-    lens = [filter.MDS(components=[0, 1],random_state=100)]
+    lens = [Filter.MDS(components=[0, 1],random_state=100)]
     projected_X = tm.filter(X, lens=lens)
 
     # Step3. Covering, clustering & mapping
@@ -37,7 +37,7 @@ In the following code, we compare the effects of choosing different components f
     cover = Cover(projected_data=MinMaxScaler().fit_transform(projected_X), resolution=20, overlap=0.75)
     graph = tm.map(data=StandardScaler().fit_transform(X), cover=cover, clusterer=clusterer)
 
-    vis_progressX(graph,X,simple=True,mode='file',filename='_static/comp1.html')
+    vis_progressX(graph,X,simple=True,mode='file',filename='comp1.html')
     #show(data=X,graph=graph, color='b', fig_size=(10, 10), node_size=15, mode='spring', strength=0.15)
 
 .. code-block:: python
@@ -81,7 +81,7 @@ What if we choose three components of MDS?
     tm = mapper.Mapper(verbose=1)
 
     # Step2. Projection
-    lens = [filter.MDS(components=[0, 1, 2],random_state=100)]
+    lens = [Filter.MDS(components=[0, 1, 2],random_state=100)]
     projected_X = tm.filter(X, lens=lens)
 
     # Step3. Covering, clustering & mapping
