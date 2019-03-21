@@ -10,7 +10,7 @@ Furthermore, mapping a specified target variable onto the network, using a color
     from sklearn.preprocessing import MinMaxScaler, StandardScaler
     from sklearn import datasets
     from sklearn.cluster import DBSCAN
-    from tmap.tda import mapper, filter
+    from tmap.tda import mapper, Filter
     from tmap.tda.cover import Cover
     from tmap.tda.plot import show, Color,tm_plot,vis_progressX
 
@@ -23,7 +23,7 @@ Furthermore, mapping a specified target variable onto the network, using a color
     tm = mapper.Mapper(verbose=1)
 
     # Step2. Projection
-    lens = [filter.MDS(components=[0, 1],random_state=100)]
+    lens = [Filter.MDS(components=[0, 1],random_state=100)]
     projected_X = tm.filter(X, lens=lens)
     projected_X = MinMaxScaler().fit_transform(projected_X)
 
@@ -37,7 +37,7 @@ Network Plotting Without a Target Variable
 
 If we don't have a target variable, we could simply use `show` to visualize the network without any specified color map. The ``show`` function was implement with the **spring layout** of `networkx`_. After the version change into 2.+, it becomes weird. So we also implement a function called ``vis_progressX`` and simple api called ``tm_plot``, both functions are based on `plotly`_. .
 
-By default, the network assigns all nodes with a default color of **red**. More flexible color is implemented inside a class called ``Color`` and it need a suitable target value and corresponding parameters.
+By default, the network assigns all nodes with a default color tm_plot(graph,projected_X,mode='file',filename='vis_1.html')of **red**. More flexible color is implemented inside a class called ``Color`` and it need a suitable target value and corresponding parameters.
 
 .. code-block:: python
 
@@ -49,7 +49,7 @@ By default, the network assigns all nodes with a default color of **red**. More 
 
 .. code-block:: python
 
-    tm_plot(graph,projected_X,mode='file',filename='_static/vis_1.html')
+    # tm_plot(graph,projected_X,mode='file',filename='vis_1.html')
     # equal to
     # vis_progressX(graph,X,simple=True,mode='file',filename='_static/vis_1.html',include_plotlyjs='cdn')
 
@@ -76,8 +76,7 @@ The following codes use a "categorical" color type for a categorical variable, s
 
 .. code-block:: python
 
-    color = Color(target=y, dtype="categorical")
-    tm_plot(graph,projected_X,color=color,mode='file',filename='_static/vis_2.html')
+    # tm_plot(graph,projected_X, mode='file',filename='vis_2.html')
     # equal to
     # vis_progressX(graph,X,simple=True,color=color,mode='file',filename='_static/vis_1.html',include_plotlyjs='cdn')
 
@@ -100,7 +99,7 @@ For a continuous target variable, we can use the "numerical" color type to make 
 .. code-block:: python
 
     color = Color(target=y, dtype="numerical")
-    tm_plot(graph,projected_X,color=color,mode='file',filename='_static/vis_3.html')
+    tm_plot(graph,projected_X,color=color,mode='file',filename='vis_3.html')
     # equal to
     # vis_progressX(graph,X,simple=True,color=color,mode='file',filename='_static/vis_1.html',include_plotlyjs='cdn')
 
@@ -120,7 +119,7 @@ Here is some basic example.
 .. code-block:: python
 
     color = Color(target=y, dtype="numerical")
-    vis_progressX(graph,projected_X,mode='file',color=color,filename='_static/vis_process.html',include_plotlyjs='cdn')
+    vis_progressX(graph,projected_X,mode='file',color=color,filename='vis_process.html',include_plotlyjs='cdn')
     # there are three kinds of mode at vis_progressX, you could also use 'obj' to capture the ``Figure`` object and custom the layout.
     # obj = vis_progressX(graph,projected_X,mode='obj',color=color)
     # obj.layout = None
