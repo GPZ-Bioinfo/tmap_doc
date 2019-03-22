@@ -45,7 +45,7 @@ Contents
    how2work.rst
    example.rst
    scripts.rst
-   api.rst
+   
    reference.rst
    FAQ.rst
 
