@@ -28,6 +28,13 @@ Or using pip::
 
     pip install tmap
 
+After install the tmap, for avoid others dependency problems. Please install ``scikit-bio`` and ``vegan`` in R.
+
+run::
+
+    pip install scikit-bio
+    R -e "install.packages('vegan')"
+
 If you encounter any error like ``Import error: tkinter``, you need to run ``sudo apt install python-tk`` or ``sudo apt install python3-tk``.
 
 For more convenient usage, we implement some executable scripts which will automatically build upon ``$PATH``. For more information about these scripts, you could see.
@@ -45,7 +52,7 @@ Contents
    how2work.rst
    example.rst
    scripts.rst
-   
+
    reference.rst
    FAQ.rst
 
