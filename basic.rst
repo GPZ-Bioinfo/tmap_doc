@@ -32,7 +32,6 @@ Once we have prepared input data (in *pandas DataFrame* or a *numpy matrix*), we
     from sklearn.preprocessing import StandardScaler,MinMaxScaler
     # Step1. initiate a Mapper
     tm = mapper.Mapper(verbose=1)
-
     # Step2. Projection
     lens = [Filter.MDS(components=[0, 1],random_state=100)]
     projected_X = tm.filter(X, lens=lens)
@@ -134,7 +133,6 @@ First, we plot and color the first feature (``sepal length``) of the iris datase
     color = Color(target=X.iloc[:,0], dtype="numerical")
     vis_progressX(graph,projected_X,simple=True,mode='file',color=Color(target=X.iloc[:,0], dtype="numerical"),filename='example1.html',auto_open=False)
 
-
 .. raw:: html
 
     <iframe src="_static/example1.html" height="500px" width="100%"></iframe>
@@ -174,7 +172,6 @@ In addition to the use of SAFE score for feature coloring and visualization, var
 .. code-block:: python
 
     from tmap.netx.SAFE import get_SAFE_summary
-    
     safe_summary = get_SAFE_summary(graph=graph, meta_data=X, safe_scores=safe_scores,
                                     n_iter_value=1000, p_value=0.01)
 
