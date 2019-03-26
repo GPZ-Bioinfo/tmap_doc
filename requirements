@@ -1,4 +1,4 @@
-
+git+https://github.com/GPZ-Bioinfo/tmap.git@master
 git+https://github.com/spatialaudio/nbsphinx.git@master
 ipykernel
 sphinx>=1.4
