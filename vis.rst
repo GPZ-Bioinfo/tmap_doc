@@ -36,7 +36,7 @@ By default, the network assigns all nodes with a default color tm_plot(graph,pro
 
 .. code-block:: python
 
-    show(data=X, graph=graph, color='red', fig_size=(10, 10), node_size=15, mode='spring', strength=0.17)
+    graph.show(color='red', fig_size=(10, 10), node_size=15)
 
 .. image:: img/param/vis_1.png
     :alt: plot network default
@@ -44,9 +44,9 @@ By default, the network assigns all nodes with a default color tm_plot(graph,pro
 
 .. code-block:: python
 
-    # tm_plot(graph,projected_X,mode='file',filename='vis_1.html')
+    tm_plot(graph,color='red',mode='file',filename='vis_1.html')
     # equal to
-    # vis_progressX(graph,X,simple=True,mode='file',filename='_static/vis_1.html',include_plotlyjs='cdn')
+    vis_progressX(graph,color='red',simple=True,mode='file',filename='vis_1.html',include_plotlyjs='cdn')
 
 .. raw:: html
 
@@ -63,7 +63,7 @@ The following codes use a "categorical" color type for a categorical variable, s
 .. code-block:: python
 
     color = Color(target=y, dtype="categorical")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.04)
+    graph.show(color=color, fig_size=(10, 10), node_size=15)
 
 .. image:: img/param/vis_2.png
     :alt: plot network with a target 1
@@ -71,9 +71,9 @@ The following codes use a "categorical" color type for a categorical variable, s
 
 .. code-block:: python
 
-    # tm_plot(graph,projected_X, mode='file',filename='vis_2.html')
+    tm_plot(graph, color=color, mode='file',filename='vis_2.html')
     # equal to
-    # vis_progressX(graph,X,simple=True,color=color,mode='file',filename='_static/vis_1.html',include_plotlyjs='cdn')
+    vis_progressX(graph,simple=True,color=color,mode='file',filename='vis_2.html',include_plotlyjs='cdn')
 
 .. raw:: html
 
@@ -84,8 +84,8 @@ For a continuous target variable, we can use the "numerical" color type to make 
 
 .. code-block:: python
 
-    color = Color(target=y, dtype="numerical")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.19)
+    color = Color(target=X[:,0], dtype="numerical")
+    graph.show(color=color, fig_size=(10, 10), node_size=15)
 
 .. image:: img/param/vis_3.png
     :alt: plot network with a target 2
@@ -93,10 +93,10 @@ For a continuous target variable, we can use the "numerical" color type to make 
 
 .. code-block:: python
 
-    color = Color(target=y, dtype="numerical")
-    tm_plot(graph,projected_X,color=color,mode='file',filename='vis_3.html')
+    color = Color(target=X[:,0], dtype="numerical")
+    tm_plot(graph,color=color,mode='file',filename='vis_3.html')
     # equal to
-    # vis_progressX(graph,X,simple=True,color=color,mode='file',filename='_static/vis_1.html',include_plotlyjs='cdn')
+    vis_progressX(graph,simple=True,color=color,mode='file',filename='vis_3.html',include_plotlyjs='cdn')
 
 .. raw:: html
 
@@ -113,10 +113,11 @@ Here is some basic example.
 
 .. code-block:: python
 
-    color = Color(target=y, dtype="numerical")
-    vis_progressX(graph,projected_X,mode='file',color=color,filename='vis_process.html',include_plotlyjs='cdn')
+    color = Color(target=y, dtype="categorical")
+    # if you use numerical, it may generate misleading color because the y is a numerical category.
+    vis_progressX(graph,mode='file',color=color,filename='vis_process.html',include_plotlyjs='cdn')
     # there are three kinds of mode at vis_progressX, you could also use 'obj' to capture the ``Figure`` object and custom the layout.
-    # obj = vis_progressX(graph,projected_X,mode='obj',color=color)
+    # obj = vis_progressX(graph,mode='obj',color=color)
     # obj.layout = None
     # plotly.offline.plot(obj)
 

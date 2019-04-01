@@ -20,32 +20,26 @@ The following codes show how SAFE scores help to identify enriched nodes with si
     from tmap.tda.utils import optimize_dbscan_eps,cover_ratio
     from tmap.netx.SAFE import SAFE_batch
     from tmap.test import load_data
-
     # load taxa abundance data, sample metadata and precomputed distance matrix
     X = load_data.FGFP_genus_profile()
     metadata = load_data.FGFP_metadata()
     dm = load_data.FGFP_BC_dist()
-
     # TDA Step1. initiate a Mapper
     tm = mapper.Mapper(verbose=1)
-
     # TDA Step2. Projection
     metric = Metric(metric="precomputed")
     lens = [Filter.MDS(components=[0, 1], metric=metric,random_state=100)]
     projected_X = tm.filter(dm, lens=lens)
-
     # Step4. Covering, clustering & mapping
     eps = optimize_dbscan_eps(X, threshold=95)
     clusterer = DBSCAN(eps=eps, min_samples=3)
     cover = Cover(projected_data=MinMaxScaler().fit_transform(projected_X), resolution=50, overlap=0.75)
     graph = tm.map(data=X, cover=cover, clusterer=clusterer)
     print('Graph covers %.2f percentage of samples.' % cover_ratio(graph,X))
-
     ## Step 6. SAFE test for every features.
     target_feature = 'Bacteroides'
     n_iter = 1000
     safe_scores = SAFE_batch(graph, meta_data=X, n_iter=n_iter)
-
     def visu_temp(target_feature,dtype='numerical',strength=0.04):
         color = Color(target=X.loc[:, target_feature], dtype=dtype, target_by="sample")
         show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=strength)
@@ -53,7 +47,6 @@ The following codes show how SAFE scores help to identify enriched nodes with si
         color = Color(target=safe_scores[target_feature], dtype=dtype, target_by="node")
         show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=strength)
         #title('SAFE score of ' +target_feature)
-
     visu_temp(target_feature,dtype='numerical',strength=0.08)
 
 .. image:: img/association/ab2SAFE_Bacteroides.png

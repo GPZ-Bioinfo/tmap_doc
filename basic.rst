@@ -50,27 +50,11 @@ The generated graph consists of 201 nodes and 1020 edges, which can be obtained 
 
 .. code-block:: python
 
-    print(len(graph['nodes']),len(graph['edges']))
+    print(len(graph.nodes),len(graph.edges))
 
     197 913
 
-Each node represents a group of samples, generated from the clustering step. Mapping between TDA nodes and samples can be found by:
-
-.. code-block:: python
-
-    print(graph['nodes'].items())
-
-    dict_items([
-    (0, array([105])),
-    (1, array([105, 118, 122])),
-    (2, array([131])),
-    (3, array([105, 118, 122])),
-    (4, array([117, 131])),
-    (5, array([117, 131])),
-    ......])
-
-
-As above, keys in the returned items are node IDs, and the values are sample index in the original input data.
+If you install the latest version of ``tmap==v1.2``, the ``Graph`` which tmap generated has been implemented based on ``networkx.Graph``. It could help us to save a lot of time to access the attributes of graph. If you are not familiar with ``networkx``, you could see the documentation at `networkx documentation <https://networkx.github.io/documentation/stable/>`_ For avoiding meet any version conflict, we force the version of networkx equal to v2.2. If there are any update, we will follow closely at the first time.
 
 Using Different Distance Metric
 ========================================
@@ -90,19 +74,22 @@ For using custom distance metric from a precomputed distance matrix, you need to
 A ``Filter`` is a general technique to project data points from the original data space onto a low dimensional space. Different filter preserves different aspect of the original dataset, such as MDS, which try to preserve distances between data points. Therefore, a ``filter`` provides a *view* of the data to look through. Multiple *views* can be joined to present the data for topological analysis. Choice of filter depends on the studied dataset and research purpose. Projection of the original dataset using a specified filter has a global effect in determining the TDA network structure.
 
 Different filters can be generated and combined into a ``lens`` using a Python list, and within each filter, different components can be specified with a index list. There are various filters implemented in the `filter` module, including PCA, MDS, and t-SNE. More filters can be easily incorporated using the defined APIs.
+t
 
 TDA Network Visualization and Coloring
 ======================================================
 
 After constructing a TDA graph, it is very useful and insightful to visualize the network for pattern discovery.
-We built wrapper classes around `networkx` and `matplolib` to facilitate TDA network visualization for different target features using a specified color mapping object.
+We built wrapper classes around `networkx` and `matplotlib` to facilitate TDA network visualization for different target features using a specified color mapping object.
+
+Different with
 
 .. code-block:: python
 
-    from tmap.tda.plot import show, Color
+    from tmap.tda.plot import Color
     y = iris.target
-    color = Color(target=y, dtype="categorical")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.14)
+    color = Color(target=y, dtype="categorical",target_by='sample')
+    graph.show(color=color, fig_size=(10, 10), node_size=15)
 
 .. image:: img/iris_basic_example1.png
     :alt: Iris tmap network
@@ -120,31 +107,32 @@ First, we plot and color the first feature (``sepal length``) of the iris datase
 
 .. code-block:: python
 
-    color = Color(target=X.iloc[:,0], dtype="numerical")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.13)
+    color = Color(target=X.iloc[:,0], dtype="numerical",target_by='sample')
+    graph.show(color=color, fig_size=(10, 10), node_size=15)
 
 .. image:: img/iris_basic_example2.png
     :alt: Iris tmap network with target feature
 
+Besides the matplotlib implemented function ``graph.show``, we also implement other function based on ``plotly`` which could display inactivated.
 
 .. code-block:: python
 
     from tmap.tda.plot import vis_progressX, Color
     color = Color(target=X.iloc[:,0], dtype="numerical")
-    vis_progressX(graph,projected_X,simple=True,mode='file',color=Color(target=X.iloc[:,0], dtype="numerical"),filename='example1.html',auto_open=False)
+    vis_progressX(graph,simple=True,mode='file',color=Color(target=X.iloc[:,0], dtype="numerical"),filename='example1.html',auto_open=False)
 
 .. raw:: html
 
     <iframe src="_static/example1.html" height="500px" width="100%"></iframe>
 
-From the above figure, feature coloring shows that ``sepal length`` is strongly associated with the network structure (range of the ``sepal length`` values and their color mapping are indicated by the color legend on the right-hand side). Then we can use the SAFE algorithm to transform the raw feature values to network-based statistical scores (log10-transformed p-values).
+From the above figure, feature coloring shows that ``sepal length`` is strongly associated with the network structure (range of the ``sepal length`` values and their color mapping are indicated by the color legend on the right-hand side). Then we can use the SAFE algorithm to transform the raw feature values to network-based statistical scores (log10-transformed p-values). ``SAFE_batch`` will return a dataframe with same columns as the inputted metadata but with different rows.
 
 .. code-block:: python
 
     from tmap.netx.SAFE import *
-    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000)
-    color = Color(target=safe_scores[X.columns[0]], dtype="numerical",target_by="node")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.15)
+    safe_scores = SAFE_batch(graph, metadata=X, n_iter=1000,_mode='enrich')
+    color = Color(target=safe_scores.iloc[:,0], dtype="numerical",target_by="node")
+    graph.show(color=color, fig_size=(10, 10), node_size=15)
 
 .. image:: img/iris_basic_example3.png
     :alt: Iris tmap network with SAFE scor
@@ -153,9 +141,9 @@ From the above figure, feature coloring shows that ``sepal length`` is strongly 
 .. code-block:: python
 
     from tmap.netx.SAFE import *
-    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=1000)
-    color = Color(target=safe_scores[X.columns[0]], dtype="numerical",target_by="node")
-    vis_progressX(graph,projected_X,simple=True,mode='file',color=color, dtype="numerical",filename='example2.html',auto_open=False)
+    safe_scores = SAFE_batch(graph, metadata=X, n_iter=1000,_mode='enrich')
+    color = Color(target=safe_scores.iloc[:,0], dtype="numerical",target_by="node")
+    vis_progressX(graph,simple=True,mode='file',color=color,filename='example2.html',auto_open=False)
 
 
 .. raw:: html
@@ -172,8 +160,8 @@ In addition to the use of SAFE score for feature coloring and visualization, var
 .. code-block:: python
 
     from tmap.netx.SAFE import get_SAFE_summary
-    safe_summary = get_SAFE_summary(graph=graph, meta_data=X, safe_scores=safe_scores,
-                                    n_iter_value=1000, p_value=0.01)
+    safe_summary = get_SAFE_summary(graph=graph, metadata=X, safe_scores=safe_scores,
+                                    n_iter=1000, p_value=0.01)
 
 
 In the above code, a p-value threshold of ``0.01`` was set to select significant nodes for the calculation of ``SAFE enriched score`` and ``enriched SAFE score ratio``, which can be used to rank the importance and filter the significance of features associated with the TDA network. For more details on SAFE summary, please see :doc:`how2work`.
@@ -187,18 +175,14 @@ Rather than analyzing each feature individually, by testing their association/co
 
  Upon the enriched area of two different feature or genera, we could construct a simple contingency tables with enriched/non-enriched and A/B features. It will output a p-value between each pair of features and form a distance matrix.
 
-With SAFE scores and a corresponding TDA graph, *p-value* and *correlation coefficient* of each pair of features are calculated by Fisher-exact test and corrected by FDR (Benjamini/Hochberg).
+With SAFE scores and a corresponding TDA graph, *p-value* and *correlation coefficient* of each pair of features are calculated by Fisher-exact test and corrected by FDR (Benjamini/Hochberg). Correction has been perform at ``pairwise_coenrichment``.
+
 
 .. code-block:: python
 
     from tmap.netx.coenrichment_analysis import pairwise_coenrichment
-    from tmap.netx.SAFE import get_enriched_nodes
+    from tmap.netx.SAFE import get_significant_nodes
     n_iter = 1000
     p_value = 0.05
-    SAFE_pvalue = np.log10(p_value) / np.log10(1.0/(n_iter + 1.0))
-    enriched_centroides, enriched_nodes = get_enriched_nodes(graph=graph,safe_scores=safe_scores,SAFE_pvalue=SAFE_pvalue,centroids=True)
+    enriched_centroides = get_significant_nodes(graph=graph,safe_scores=safe_scores,nr_threshold=0.5,pvalue=p_value,n_iter=n_iter)
     asso_pairs = pairwise_coenrichment(graph,safe_scores,n_iter=n_iter, p_value=p_value,_pre_cal_enriched=enriched_centroides)
-    from statsmodels.sandbox.stats.multicomp import multipletests
-    corrected_fe_dis = pd.DataFrame(multipletests(asso_pairs.values.reshape(-1,), method='fdr_bh')[1].reshape(asso_pairs.shape),
-                                index=asso_pairs.index,
-                                columns=asso_pairs.columns)

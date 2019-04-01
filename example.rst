@@ -22,24 +22,24 @@ To demonstrate and validate the performance of *tmap*, we benchmarked the result
     from sklearn.cluster import DBSCAN
     from tmap.tda import mapper, Filter
     from tmap.tda.cover import Cover
-    from tmap.tda.plot import show, Color
+    from tmap.tda.plot import Color
     from tmap.tda.metric import Metric
-    from tmap.tda.utils import optimize_dbscan_eps,cover_ratio
+    from tmap.tda.utils import optimize_dbscan_eps
     from tmap.netx.SAFE import SAFE_batch, get_SAFE_summary
     from tmap.test import load_data
     import os
 
     # load taxa abundance data, sample metadata and precomputed distance matrix
     X = load_data.FGFP_genus_profile()
-    metadata = load_data.FGFP_metadata()
-    dm = load_data.FGFP_BC_dist()
+    metadata = load_data.FGFP_metadata_ready()
+    dm = squareform(pdist(X,metric='braycurtis'))
 
     # TDA Step1. initiate a Mapper
     tm = mapper.Mapper(verbose=1)
 
     # TDA Step2. Projection
     metric = Metric(metric="precomputed")
-    lens = [Filter.MDS(components=[0, 1], metric=metric,random_state=100)]
+    lens = [Filter.MDS(components=[0, 1], metric=metric, random_state=100)]
     projected_X = tm.filter(dm, lens=lens)
 
     # Step4. Covering, clustering & mapping
@@ -47,9 +47,18 @@ To demonstrate and validate the performance of *tmap*, we benchmarked the result
     clusterer = DBSCAN(eps=eps, min_samples=3)
     cover = Cover(projected_data=MinMaxScaler().fit_transform(projected_X), resolution=50, overlap=0.75)
     graph = tm.map(data=X, cover=cover, clusterer=clusterer)
-    print('Graph covers %.2f percentage of samples.' % cover_ratio(graph,X))
+    print(graph.info())
+
     n_iter = 1000
-    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=n_iter)
+    enriched_scores = SAFE_batch(graph,
+                         metadata=pd.concat([X,metadata],axis=1),
+                         n_iter=n_iter,
+                         _mode = 'enrich')
+    safe_summary = get_SAFE_summary(graph=graph,
+                                metadata=pd.concat([X,metadata],axis=1),
+                                safe_scores=enriched_scores,
+                                n_iter=n_iter,
+                                p_value=0.01)
 
 
 Driver species analysis
@@ -59,7 +68,14 @@ In FGFP study, driver genus was identified by the contribution of each genus to 
 
 Additionally, *tmap* also identified top-ranking driver genera that were not reported among the top-10 driver genera in the FGFP study, including *unclassified_Veillonellaceae, unclassified_Clostridiaceae and Sporobacter*. As in the following figure of *tmap* network visualization, these genera (such as *Sporobacter*) show enrichments in multiple dispersed parts of the network, rather than a single enriched component, which presents a 'non-linear' pattern that may be hard to detect in CCA.
 
+.. code-block:: python
 
+   from tmap.tda.plot import Color
+   color = Color(X.loc[:,'Sporobacter'],target_by='sample',dtype='numerical')
+   graph.show(color=color)
+
+   color = Color(enriched_scores.loc[:,'Sporobacter'],target_by='node',dtype='numerical')
+   graph.show(color=color)
 
 .. image:: img/example/FGFP_fig1.png
     :alt: FGFP Sporobacter
@@ -73,10 +89,28 @@ Since *tmap* was robust to identify both linear and non-linear associations, 67 
 
 The two covariates reported as significant in the FGFP study but not identified by *tmap* are *G03DA04_progesterone* and *Gamma-glutamyltransferase*. As shown in the following figures, it can be found that, *G03DA04_progesterone* was observed only in a small group of samples, and is not significant (SAFE score < 0.67) after SAFE transformation due to the small sample size.
 
+.. code-block:: python
+
+   from tmap.tda.plot import Color
+   color = Color(metadata.loc[:,'G03DA04_progesterone'],target_by='sample',dtype='numerical')
+   graph.show(color=color)
+
+   color = Color(enriched_scores.loc[:,G03DA04_progesterone'],target_by='node',dtype='numerical')
+   graph.show(color=color)
+
 .. image:: img/example/FGFP_fig2.png
     :alt: FGFP G03DA04_progesterone
 
 In contrast, *Gamma-glutamyltransferase* was observed in most of the samples as in the following figure. But the network landscape (SAFE scores) of this factor did not show significant patterns of enrichment (SAFE score < 0.67).
+
+.. code-block:: python
+
+   from tmap.tda.plot import Color
+   color = Color(metadata.loc[:,'Gamma-glutamyltransferase'],target_by='sample',dtype='numerical')
+   graph.show(color=color)
+
+   color = Color(enriched_scores.loc[:,Gamma-glutamyltransferase'],target_by='node',dtype='numerical')
+   graph.show(color=color)
 
 .. image:: img/example/FGFP_fig3.png
     :alt: FGFP Gamma-glutamyltransferase
@@ -89,6 +123,15 @@ In FGFP study, *the boosted additive generalized linear model* was performed to 
 As an alternative, *tmap* uses the network-based SAFE scores for association analysis, rather than the original feature values. And association is performed based on aggregated values on nodes (groups of samples), instead of original feature values on samples. Pairwise Pearson correlation was calculated with a FDR<5% significance level. Compared with results of the FGFP study, this approach reported improved effect sizes of host covariates (correlation coefficient from 0.115 to 0.728). For example, the association between *concentration of serum Hemoglobin* and abundance of *Roseburia*, detected to be significantly associated by both approaches, the coefficient was improved from 0.12 to 0.72 by using *tmap*.
 
 Additionally, new associations were also identified by *tmap*. For example, the association between usage of *A06AD15_65_.osmotic_laxatives* and abundance of *Aeromonas* was found, as demonstrated in the following figure.
+
+.. code-block:: python
+
+   from tmap.tda.plot import Color
+   color = Color(metadata.loc[:,'A06AD15_65_.osmotic_laxatives'],target_by='sample',dtype='numerical')
+   graph.show(color=color)
+
+   color = Color(enriched_scores.loc[:,A06AD15_65_.osmotic_laxatives'],target_by='node',dtype='numerical')
+   graph.show(color=color)
 
 .. image:: img/example/FGFP_fig4.png
     :alt: FGFP MWAS
@@ -103,32 +146,32 @@ More details about the codes used in this analysis can be found at ``test/test_D
 .. code-block:: python
 
     from __future__ import print_function
-    from sklearn.preprocessing import MinMaxScaler
+
+    from matplotlib.pyplot import title
+    from scipy.spatial.distance import pdist, squareform
     from sklearn.cluster import DBSCAN
+    from sklearn.preprocessing import MinMaxScaler
+
     from tmap.tda import mapper, Filter
     from tmap.tda.cover import Cover
-    from tmap.tda.plot import show, Color
     from tmap.tda.metric import Metric
-    from tmap.tda.utils import optimize_dbscan_eps,cover_ratio
-    from tmap.netx.SAFE import SAFE_batch, get_SAFE_summary
+    from tmap.tda.plot import Color
+    from tmap.tda.utils import optimize_dbscan_eps
     from tmap.test import load_data
-    from matplotlib.pyplot import title
-    from scipy.spatial.distance import pdist,squareform
 
     # load taxa abundance data, sample metadata and precomputed distance matrix
     X = load_data.Daily_genus_profile("stool")
-    X = X.drop("Stool69",axis=0)
-    # Stool69 is missing at provided metadata. So deleted it
+    X = X.drop("Stool69", axis=0)
     metadata = load_data.Daily_metadata_ready()
-    dm = squareform(pdist(X,metric="braycurtis"))
-    metadata = metadata.loc[X.index,:]
+    dm = squareform(pdist(X, metric="braycurtis"))
+    metadata = metadata.loc[X.index, :]
 
     # TDA Step1. initiate a Mapper
     tm = mapper.Mapper(verbose=1)
 
     # TDA Step2. Projection
     metric = Metric(metric="precomputed")
-    lens = [Filter.MDS(components=[0, 1], metric=metric,random_state=100)]
+    lens = [Filter.MDS(components=[0, 1], metric=metric, random_state=100)]
     projected_X = tm.filter(dm, lens=lens)
 
     # Step4. Covering, clustering & mapping
@@ -136,14 +179,15 @@ More details about the codes used in this analysis can be found at ``test/test_D
     clusterer = DBSCAN(eps=eps, min_samples=3)
     cover = Cover(projected_data=MinMaxScaler().fit_transform(projected_X), resolution=50, overlap=0.85)
     graph = tm.map(data=X, cover=cover, clusterer=clusterer)
-    print('Graph covers %.2f percentage of samples.' % cover_ratio(graph,X))
+    print(graph.info())
 
 
-.. code-block:: python
+.. code-block:: bash
 
     Filtering by MDS.
-    ...calculate distance matrix using the precomputed metric.
-    Finish filtering of points cloud data.
+    ...calculate Filter(which used to create cover) using the provided precomputed lens.
+
+    Filtering has been completed.
     Mapping on data (501, 98) using lens (501, 2)
     ...minimal number of points in hypercube to do clustering: 3
     ...create 474 nodes.
@@ -151,7 +195,31 @@ More details about the codes used in this analysis can be found at ``test/test_D
     ...construct a TDA graph.
     ...create 3313 edges.
     Finish TDA mapping
-    Graph covers 91.22 percentage of samples.
+
+    Graph
+    Contains 474 nodes and 457 samples
+    During constructing graph, 44 (91.22%) samples lost
+
+    Used params:
+
+    cluster params
+    algorithm: auto
+    eps: 0.22820305584204845
+    leaf_size: 30
+    metric: euclidean
+    metric_params: None
+    min_samples: 3
+    n_jobs: None
+    p: None
+    =================
+    cover params
+    r: 50
+    overlap: 0.85
+    =================
+    lens params
+    lens_0:
+    components: [0, 1]
+    metric: precomputed
 
 
 First, we take the metadata of ``COLLECTION_DAY`` as our target variable to be mapped to the microbiome TDA network.
@@ -159,8 +227,10 @@ First, we take the metadata of ``COLLECTION_DAY`` as our target variable to be m
 .. code-block:: python
 
     target_feature = 'COLLECTION_DAY'
-    color = Color(target=metadata.loc[:, target_feature], dtype="numerical", target_by="sample")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.13)
+    color = Color(target=metadata.loc[:, target_feature],
+                  dtype="numerical",
+                  target_by="sample")
+    graph.show(color=color, fig_size=(10, 10), node_size=15, notshow=True)
 
 The following figure shows how the fecal microbiome changes with the ``COLLECTION_DAY`` for the two studied subjects.
 
@@ -172,11 +242,15 @@ Next, we can map ``HOST_SUBJECT_ID`` to the TDA network to show inter-individual
 .. code-block:: python
 
     target_feature = 'HOST_SUBJECT_ID'
-    color = Color(target=metadata.loc[:, target_feature], dtype="categorical", target_by="sample")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.13)
+    color = Color(target=metadata.loc[:, target_feature],
+                  dtype="categorical",
+                  target_by="sample")
+    graph.show(color=color, fig_size=(10, 10), node_size=15, notshow=True)
 
-    color = Color(target=metadata.loc[:, target_feature], dtype="numerical", target_by="sample")
-    show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.13)
+    color = Color(target=metadata.loc[:, target_feature],
+                  dtype="numerical",
+                  target_by="sample")
+    graph.show(color=color, fig_size=(10, 10), node_size=15, notshow=True)
 
 
 .. image:: img/example/Daily_host_compare.png
@@ -186,31 +260,26 @@ The main focus of the original study is to associate changes in microbiome with 
 
 .. code-block:: python
 
-    def time_range(sample,start,end):
-        target_vals = [1 if metadata.loc[_,"HOST_SUBJECT_ID"]=="2202:Donor%s" % sample and metadata.loc[_,"COLLECTION_DAY"] in list(range(start,end+1)) else 0 for _ in X.index]
+    def time_range(sample, start, end):
+        target_vals = [1 if metadata.loc[_, "HOST_SUBJECT_ID"] == "2202:Donor%s" % sample and metadata.loc[_, "COLLECTION_DAY"] in list(range(start, end + 1)) else 0 for _ in X.index]
         color = Color(target=target_vals, dtype="numerical", target_by="sample")
-        show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=0.03)
-        #title("Subject %s at day %s to %s" % (sample,start,end))
+        graph.show(color=color, fig_size=(10, 10), node_size=15,notshow=True)
+        title("Subject %s at %s to %s" % (sample, start, end))
+
+
     # Travel period
-    time_range("A",70,123)
+    time_range("A", 70, 123)
     # First diarrheal illness
-    time_range("A",80,85)
+    time_range("A", 80, 85)
     # Second diarrheal illness
-    time_range("A",104,113)
+    time_range("A", 104, 113)
 
     # Pre-travel period
-    time_range("A",40,69)
+    time_range("A", 40, 69)
     # Travel period
-    time_range("A",70,122)
+    time_range("A", 70, 122)
     # Post-travel period
-    time_range("A",123,153)
-
-    # Pre-enteric infection period
-    time_range("B",121,150)
-    # enteric infection period
-    time_range("B",151,159)
-    # Post-enteric infection period
-    time_range("B",160,197)
+    time_range("A", 123, 153)
 
 
 .. image:: img/example/Daily_Stool_A_diarrheal.png

@@ -84,10 +84,12 @@ After obtaining SAFE scores of each feature, different statistical metrics of en
 .. code-block:: python
 
   from tmap.netx.SAFE import get_SAFE_summary
-  safe_summary = get_SAFE_summary(graph=graph, meta_data=X, safe_scores=safe_scores,
-                                  n_iter_value=n_iter, p_value=0.01)
+  safe_summary = get_SAFE_summary(graph=graph, metadata=X, safe_scores=safe_scores,
+                                  n_iter=n_iter, p_value=0.01)
 
-The p-value threshold of ``0.01`` was set to select significant nodes for the calculation. The above ``n_iter_value`` was used to calculated lowest bound of SAFE scores and it need to be equivalent to the ``n_iter`` of providing safe_scores.
+The p-value threshold of ``0.01`` was set to select significant nodes for the calculation. The above ``n_iter`` was used to calculated lowest bound of SAFE scores and it need to be equivalent to the ``n_iter`` of providing safe_scores.
+
+The key params ``n_iter`` could also be None. When you calculate the safe_scores, it will auto stodge used parameters into graph and its safe_scores. If you doesn't provide ``n_iter``, it will automatically take the last used parameters as the parameters.
 
 ``get_SAFE_summary`` will result a DataFrame with following headers.
 
