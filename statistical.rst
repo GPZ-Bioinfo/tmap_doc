@@ -120,8 +120,3 @@ Upon the enriched area, we can perform a network-based co-enrichment relationshi
     from tmap.netx.coenrichment_analysis import pairwise_coenrichment
     asso_pairs = pairwise_coenrichment(graph,safe_scores,n_iter=1000,p_value=0.05,_pre_cal_enriched=enriched_centroides)
     # pre_cal_enriched could be none, and it will be calculated inside the pairwise_coenrichment function.
-    from statsmodels.sandbox.stats.multicomp import multipletests
-    import pandas as pd
-    corrected_fe_dis = pd.DataFrame(multipletests(asso_pairs.values.reshape(-1,), method='fdr_bh')[1].reshape(asso_pairs.shape),
-                                index=asso_pairs.index,
-                                columns=asso_pairs.columns)

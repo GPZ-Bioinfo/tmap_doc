@@ -32,4 +32,4 @@ FAQ
   You can use ``tmap.tda.utils.cover_ratio`` to calculate how many samples were retained in the final TDA network. By using other clustering methods, such as **k-means clustering**, you can retain all the samples. *tmap* can take any other cluster method from *scikit-learn* (or with *scikit-learn* compatible APIs), although we recommend using the default **DBSCAN** method. For how to keep more samples in the final TDA network, you can see :doc:`param` for more details.
 
 
-For further questions, and any suggestion, you are welcome to contact us via email: haokui.zhou@gmail.com.
+For further questions, and any suggestion, you are welcome to contact us via email: haokui.zhou@gmail.com or issue at https://github.com/GPZ-Bioinfo/tmap.

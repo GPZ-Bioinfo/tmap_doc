@@ -16,8 +16,15 @@ Here are a example for understanding the pipeline of these scripts. The test dat
 .. code-block:: bash
 
     envfit_analysis.py -I tmap/test/test_data/FGFP_genus_data.csv -M tmap/test/test_data/FGFP_metadata.tsv -O output/FGFP_envfit.csv -tn 'temp' --keep -v
+    # -tn 'temp' is for control the name of intermediate file
+    # --keep is for keep the intermediate files in order to make down-stream script to use it
+    # -v just verbose output
     Network_generator.py -I tmap/test/test_data/FGFP_genus_data.csv -O output/FGFP.graph -v
     SAFE_analysis.py both -G output/FGFP.graph -M output/temp.envfit.metadata output/temp.envfit.data -P output/FGFP -i 1000 -p 0.05 --raw -v
+    # -i : number of iteration
+    # -p : p value for take as significance
+    # --raw : output raw SAFE result, actually it is a dataframe now.
+    # -v just verbose output
     # generate 7 files
     SAFE_visualization.py ranking -G output/FGFP.graph -S2 output/FGFP_temp.envfit.metadata_enrich.csv output/FGFP_envfit.csv -O output/FGFP_ranking.html
     SAFE_visualization.py stratification -G output/FGFP.graph -S1 output/FGFP_raw_enrich -O output/FGFP_stratification.pdf --type pdf --width 1600 --height 1400

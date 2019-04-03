@@ -47,6 +47,7 @@ Contents
    vis.rst
    statistical.rst
    how2work.rst
+   core_result.rst
    example.rst
    scripts.rst
    api.rst

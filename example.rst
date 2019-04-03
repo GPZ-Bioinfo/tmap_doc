@@ -17,7 +17,6 @@ To demonstrate and validate the performance of *tmap*, we benchmarked the result
 
 .. code-block:: python
 
-    from __future__ import print_function
     from sklearn.preprocessing import MinMaxScaler
     from sklearn.cluster import DBSCAN
     from tmap.tda import mapper, Filter
@@ -27,6 +26,8 @@ To demonstrate and validate the performance of *tmap*, we benchmarked the result
     from tmap.tda.utils import optimize_dbscan_eps
     from tmap.netx.SAFE import SAFE_batch, get_SAFE_summary
     from tmap.test import load_data
+    from scipy.spatial.distance import squareform,pdist
+    import pandas as pd
     import os
 
     # load taxa abundance data, sample metadata and precomputed distance matrix
