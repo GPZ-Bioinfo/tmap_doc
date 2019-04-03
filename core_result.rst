@@ -57,12 +57,11 @@ With the graph and corresponding SAFE score, we could go further now.
 Co-enrichment relations
 ========================
 
-.. code-blokc:: python
+.. code-block:: python
 
     import itertools
     from tmap.netx.SAFE import get_significant_nodes
     from tmap.netx.coenrichment_analysis import *
-
     enriched_centroides, enriched_nodes = get_significant_nodes(graph=graph,
                                                                 safe_scores=enriched_scores,
                                                                 n_iter=n_iter,
