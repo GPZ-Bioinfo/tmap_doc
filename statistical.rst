@@ -10,44 +10,58 @@ The following codes show how SAFE scores help to identify enriched nodes with si
 
 .. code-block:: python
 
-    import os
-    from sklearn.preprocessing import MinMaxScaler
+    from scipy.spatial.distance import squareform, pdist
     from sklearn.cluster import DBSCAN
+    from sklearn.preprocessing import MinMaxScaler
+
+    from tmap.netx.SAFE import SAFE_batch, get_SAFE_summary
     from tmap.tda import mapper, Filter
     from tmap.tda.cover import Cover
-    from tmap.tda.plot import show, Color
     from tmap.tda.metric import Metric
-    from tmap.tda.utils import optimize_dbscan_eps,cover_ratio
-    from tmap.netx.SAFE import SAFE_batch
+    from tmap.tda.plot import Color
+    from tmap.tda.utils import optimize_dbscan_eps
     from tmap.test import load_data
+
     # load taxa abundance data, sample metadata and precomputed distance matrix
     X = load_data.FGFP_genus_profile()
-    metadata = load_data.FGFP_metadata()
-    dm = load_data.FGFP_BC_dist()
+    metadata = load_data.FGFP_metadata_ready()
+    dm = squareform(pdist(X, metric='braycurtis'))
+
     # TDA Step1. initiate a Mapper
     tm = mapper.Mapper(verbose=1)
+
     # TDA Step2. Projection
     metric = Metric(metric="precomputed")
     lens = [Filter.MDS(components=[0, 1], metric=metric,random_state=100)]
     projected_X = tm.filter(dm, lens=lens)
+
     # Step4. Covering, clustering & mapping
     eps = optimize_dbscan_eps(X, threshold=95)
     clusterer = DBSCAN(eps=eps, min_samples=3)
     cover = Cover(projected_data=MinMaxScaler().fit_transform(projected_X), resolution=50, overlap=0.75)
     graph = tm.map(data=X, cover=cover, clusterer=clusterer)
-    print('Graph covers %.2f percentage of samples.' % cover_ratio(graph,X))
+    print(graph.info())
     ## Step 6. SAFE test for every features.
+    # target_feature = 'Faecalibacterium'
+    # target_feature = 'Prevotella'
     target_feature = 'Bacteroides'
     n_iter = 1000
-    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=n_iter)
-    def visu_temp(target_feature,dtype='numerical',strength=0.04):
-        color = Color(target=X.loc[:, target_feature], dtype=dtype, target_by="sample")
-        show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=strength)
-        #title('Abundance of ' + target_feature)
-        color = Color(target=safe_scores[target_feature], dtype=dtype, target_by="node")
-        show(data=X, graph=graph, color=color, fig_size=(10, 10), node_size=15, mode='spring', strength=strength)
-        #title('SAFE score of ' +target_feature)
-    visu_temp(target_feature,dtype='numerical',strength=0.08)
+    enriched_scores = SAFE_batch(graph, metadata=X, n_iter=n_iter, _mode='enrich')
+    target_safe_score = enriched_scores.loc[:, target_feature]
+    ## Step 7. Visualization
+    # colors by samples (target values in a list)
+    color = Color(target=X.loc[:, target_feature], dtype="numerical", target_by="sample")
+    graph.show(color=color,
+               fig_size=(10, 10),
+               node_size=15,
+               notshow=False)
+
+    # colors by nodes (target values in a dictionary)
+    color = Color(target=target_safe_score, dtype="numerical", target_by="node")
+    graph.show(color=color,
+               fig_size=(10, 10),
+               node_size=15,
+               notshow=False)
 
 .. image:: img/association/ab2SAFE_Bacteroides.png
     :align: center
@@ -57,8 +71,8 @@ Of course, besides the visualization based on ``matplotlib``, you could also use
 .. code-block:: python
 
     from tmap.tda.plot import vis_progressX,tm_plot,Color
-    color = Color(target=safe_scores[target_feature], dtype='numerical', target_by="node")
-    tm_plot(graph,projected_X,color=color,filename='SAFE_Bacteroides.html',auto_open=False)
+    color = Color(target=target_safe_score, dtype='numerical', target_by="node")
+    tm_plot(graph,color=color,filename='SAFE_Bacteroides.html',auto_open=False)
 
 .. raw:: html
 
@@ -99,17 +113,17 @@ As below,
 
     from tmap.netx.SAFE import SAFE_batch
     n_iter = 1000
-    safe_scores = SAFE_batch(graph, meta_data=X, n_iter=n_iter)
+    safe_scores = SAFE_batch(graph, metadata=X, n_iter=n_iter)
 
 When we get the SAFE score which represented enrichment scale of specific feature, we could use a hard filter from assigned p-value to filter out a enriched region/nodes.
 
 .. code-block:: python
 
-    from tmap.netx.SAFE import get_enriched_nodes
+    from tmap.netx.SAFE import get_significant_nodes
     min_p_value = 1.0 / (n_iter + 1.0)
     p_value = 0.05
     SAFE_pvalue = np.log10(p_value) / np.log10(min_p_value)
-    enriched_centroides, enriched_nodes = get_enriched_nodes(graph,safe_scores,SAFE_pvalue,centroids=True)
+    enriched_centroides, enriched_nodes = get_significant_nodes(graph,safe_scores,SAFE_pvalue=SAFE_pvalue,r_neighbor=True)
 
 Default, the function ``get_enriched_nodes`` only output the enriched nodes around the centroides. The difference between **neighborhood** and **centroides** could be find out at SAFE algorithm of :doc:`'How tmap work'<how2work>`.
 
