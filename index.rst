@@ -68,3 +68,5 @@ Indices and tables
 
 *tmap* Publication
 ########################
+
+Liao, T., Wei, Y., Luo, M. et al. tmap: an integrative framework based on topological data analysis for population-scale microbiome stratification and association studies. Genome Biol 20, 293 (2019) `doi:10.1186/s13059-019-1871-4 <https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1871-4>`_ 
