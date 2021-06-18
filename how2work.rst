@@ -59,7 +59,7 @@ The **SAFE** algorithm takes the following steps to calculate an enrichment scor
 
     P_{n} = \frac{m}{I}
 
-where ``m`` is the number of times a shuffled value is greater than or equal to observed values; ``I`` is the number of shuffles;
+where ``m`` is the number of times a shuffled value is greater than or equal to the observed value; ``I`` is the number of shuffles;
 
 .. math::
 
